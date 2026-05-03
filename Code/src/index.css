@@ -340,6 +340,23 @@ input:focus {
   text-align: center;
 }
 
+.lockout-banner {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(192, 57, 43, 0.08);
+  border: 0.5px solid rgba(192, 57, 43, 0.35);
+  color: var(--color-text-danger);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.lockout-banner strong {
+  font-weight: 500;
+}
+
 /* Vault file picker — matches the master-password input row */
 
 .vault-file-input {

@@ -124,6 +124,8 @@ export const tauri = {
   getLastVaultPath: () => invoke<string | null>("get_last_vault_path"),
   setLastVaultPath: (path: string) =>
     invoke<void>("set_last_vault_path", { path }),
+  getLockoutState: (path: string) =>
+    invoke<LockoutInfo>("get_lockout_state", { path }),
 
   // Files
   addFile: (sourcePath: string, category: string, section?: string | null) =>
@@ -271,4 +273,12 @@ export interface UpdateInfo {
   download_url: string | null;
   notes: string | null;
   checked_at: string;
+}
+
+export interface LockoutInfo {
+  locked: boolean;
+  seconds_remaining: number;
+  failed_attempts: number;
+  attempts_before_lockout: number;
+  consecutive_lockouts: number;
 }

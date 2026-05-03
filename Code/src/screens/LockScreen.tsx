@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
-import { tauri } from "../lib/tauri";
+import { tauri, type LockoutInfo } from "../lib/tauri";
 import { useVaultStore } from "../store/vaultStore";
 import { VAULT_OPEN_EXTS } from "../lib/filenames";
 import logoUrl from "../assets/signet-logo.png";
@@ -44,17 +44,52 @@ function basenameOf(p: string): string {
   return idx >= 0 ? p.slice(idx + 1) : p;
 }
 
+function formatRemaining(secs: number): string {
+  if (secs <= 0) return "0s";
+  if (secs < 60) return `${Math.ceil(secs)}s`;
+  if (secs < 3600) return `${Math.ceil(secs / 60)} min`;
+  const h = Math.floor(secs / 3600);
+  const m = Math.round((secs % 3600) / 60);
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
 export function LockScreen() {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [lockout, setLockout] = useState<LockoutInfo | null>(null);
   const { vaultPath, displayName, setMeta, setRoute, setVaultPath, setDisplayName } =
     useVaultStore();
+
+  // Poll lockout state — frequently while locked (so the countdown ticks),
+  // less often when not.
+  useEffect(() => {
+    if (!vaultPath) return;
+    let cancelled = false;
+    const fetchOnce = () => {
+      tauri
+        .getLockoutState(vaultPath)
+        .then((s) => {
+          if (!cancelled) setLockout(s);
+        })
+        .catch(() => undefined);
+    };
+    fetchOnce();
+    const interval = window.setInterval(
+      fetchOnce,
+      lockout?.locked ? 1000 : 5000
+    );
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [vaultPath, lockout?.locked]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password || !vaultPath || loading) return;
+    if (lockout?.locked) return;
     setLoading(true);
     setError(null);
     try {
@@ -66,12 +101,25 @@ export function LockScreen() {
       setRoute("browser");
     } catch (err) {
       const msg = typeof err === "string" ? err : "Incorrect password";
-      setError(
-        msg.toLowerCase().includes("password") ||
-          msg.toLowerCase().includes("corrupted")
-          ? "Incorrect password"
-          : msg
-      );
+      const lower = msg.toLowerCase();
+      if (lower.startsWith("vault is locked")) {
+        // Backend just refused because we're now locked. Refresh state.
+        setError(msg);
+      } else {
+        setError(
+          lower.includes("password") || lower.includes("corrupted")
+            ? "Incorrect password"
+            : msg
+        );
+      }
+      // Refresh the lockout state — failed attempts may have just incremented
+      // or pushed us into a lockout.
+      if (vaultPath) {
+        tauri
+          .getLockoutState(vaultPath)
+          .then(setLockout)
+          .catch(() => undefined);
+      }
     } finally {
       setLoading(false);
     }
@@ -167,6 +215,7 @@ export function LockScreen() {
             autoFocus
             autoComplete="current-password"
             spellCheck={false}
+            disabled={lockout?.locked}
           />
           <button
             type="button"
@@ -182,19 +231,54 @@ export function LockScreen() {
         <button
           type="submit"
           className="unlock-btn"
-          disabled={!password || loading}
+          disabled={!password || loading || lockout?.locked}
         >
           {loading ? (
             <>
               <span className="spinner" />
               Unlocking…
             </>
+          ) : lockout?.locked ? (
+            `Locked — ${formatRemaining(lockout.seconds_remaining)} left`
           ) : (
             "Unlock vault"
           )}
         </button>
 
-        {error && <div className="error-msg">{error}</div>}
+        {lockout?.locked ? (
+          <div className="lockout-banner">
+            <strong>Vault locked.</strong> Too many wrong attempts. Try again
+            in <strong>{formatRemaining(lockout.seconds_remaining)}</strong>.
+            {lockout.consecutive_lockouts > 1 && (
+              <div style={{ marginTop: 4, fontSize: 10, opacity: 0.85 }}>
+                {lockout.consecutive_lockouts} consecutive lockouts — each
+                escalates the cooldown.
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {error && <div className="error-msg">{error}</div>}
+            {!error &&
+              lockout &&
+              lockout.failed_attempts > 0 &&
+              lockout.failed_attempts < lockout.attempts_before_lockout && (
+                <div
+                  className="error-msg"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
+                  {lockout.attempts_before_lockout - lockout.failed_attempts}{" "}
+                  attempt
+                  {lockout.attempts_before_lockout -
+                    lockout.failed_attempts ===
+                  1
+                    ? ""
+                    : "s"}{" "}
+                  left before lockout
+                </div>
+              )}
+          </>
+        )}
 
         <div className="divider" />
         <div className="new-vault">

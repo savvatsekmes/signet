@@ -1,12 +1,44 @@
-import { useState } from "react";
-import { tauri } from "../lib/tauri";
+import { useEffect, useState } from "react";
+import { tauri, type LockoutInfo } from "../lib/tauri";
 import { useVaultStore } from "../store/vaultStore";
+
+function formatRemaining(secs: number): string {
+  if (secs <= 0) return "0s";
+  if (secs < 60) return `${Math.ceil(secs)}s`;
+  if (secs < 3600) return `${Math.ceil(secs / 60)} min`;
+  const h = Math.floor(secs / 3600);
+  const m = Math.round((secs % 3600) / 60);
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
 
 export function RecoveryScreen() {
   const { vaultPath, setMeta, setRoute } = useVaultStore();
   const [shardsText, setShardsText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [lockout, setLockout] = useState<LockoutInfo | null>(null);
+
+  useEffect(() => {
+    if (!vaultPath) return;
+    let cancelled = false;
+    const fetchOnce = () => {
+      tauri
+        .getLockoutState(vaultPath)
+        .then((s) => {
+          if (!cancelled) setLockout(s);
+        })
+        .catch(() => undefined);
+    };
+    fetchOnce();
+    const interval = window.setInterval(
+      fetchOnce,
+      lockout?.locked ? 1000 : 5000
+    );
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [vaultPath, lockout?.locked]);
 
   const parseShards = (raw: string): string[] =>
     raw
@@ -17,6 +49,7 @@ export function RecoveryScreen() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!vaultPath || loading) return;
+    if (lockout?.locked) return;
     const shards = parseShards(shardsText);
     if (shards.length < 2) {
       setError("Provide at least 2 shards (one per line, or comma-separated)");
@@ -32,6 +65,12 @@ export function RecoveryScreen() {
     } catch (err) {
       const msg = typeof err === "string" ? err : "Recovery failed";
       setError(msg);
+      if (vaultPath) {
+        tauri
+          .getLockoutState(vaultPath)
+          .then(setLockout)
+          .catch(() => undefined);
+      }
     } finally {
       setLoading(false);
     }
@@ -69,24 +108,60 @@ export function RecoveryScreen() {
           autoFocus
           spellCheck={false}
           placeholder={"AQID...==\nBAUG...=="}
+          disabled={lockout?.locked}
         />
 
         <button
           type="submit"
           className="unlock-btn"
-          disabled={loading || !shardsText.trim()}
+          disabled={loading || !shardsText.trim() || lockout?.locked}
         >
           {loading ? (
             <>
               <span className="spinner" />
               Reconstructing…
             </>
+          ) : lockout?.locked ? (
+            `Locked — ${formatRemaining(lockout.seconds_remaining)} left`
           ) : (
             "Unlock with shards"
           )}
         </button>
 
-        {error && <div className="error-msg">{error}</div>}
+        {lockout?.locked ? (
+          <div className="lockout-banner">
+            <strong>Vault locked.</strong> Too many wrong attempts. Try again
+            in <strong>{formatRemaining(lockout.seconds_remaining)}</strong>.
+            {lockout.consecutive_lockouts > 1 && (
+              <div style={{ marginTop: 4, fontSize: 10, opacity: 0.85 }}>
+                {lockout.consecutive_lockouts} consecutive lockouts — each
+                escalates the cooldown.
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {error && <div className="error-msg">{error}</div>}
+            {!error &&
+              lockout &&
+              lockout.failed_attempts > 0 &&
+              lockout.failed_attempts < lockout.attempts_before_lockout && (
+                <div
+                  className="error-msg"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
+                  {lockout.attempts_before_lockout - lockout.failed_attempts}{" "}
+                  attempt
+                  {lockout.attempts_before_lockout -
+                    lockout.failed_attempts ===
+                  1
+                    ? ""
+                    : "s"}{" "}
+                  left before lockout
+                </div>
+              )}
+          </>
+        )}
 
         <div className="divider" />
         <div className="new-vault">

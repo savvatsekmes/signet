@@ -98,6 +98,27 @@ pub async fn get_display_name(path: String) -> Result<Option<String>, String> {
     format::read_display_name(&path)
 }
 
+#[derive(serde::Serialize)]
+pub struct LockoutInfo {
+    pub locked: bool,
+    pub seconds_remaining: i64,
+    pub failed_attempts: u8,
+    pub attempts_before_lockout: u8,
+    pub consecutive_lockouts: u8,
+}
+
+#[tauri::command]
+pub async fn get_lockout_state(path: String) -> Result<LockoutInfo, String> {
+    let s = format::read_lockout(&path)?;
+    Ok(LockoutInfo {
+        locked: s.is_locked(),
+        seconds_remaining: s.seconds_remaining(),
+        failed_attempts: s.failed_attempts,
+        attempts_before_lockout: format::ATTEMPTS_BEFORE_LOCKOUT,
+        consecutive_lockouts: s.consecutive_lockouts,
+    })
+}
+
 #[tauri::command]
 pub async fn get_vault_meta(state: State<'_, AppState>) -> Result<VaultMeta, String> {
     let manifest_lock = state.manifest.lock().map_err(|_| "State lock poisoned")?;

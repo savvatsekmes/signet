@@ -1,0 +1,52 @@
+Adobe After Effects v24.6.8 Windows 64 render log for project “Signet_designs_v002.aep”
+
+Rendering started on 3/05/2026 at 10:17:41 AM
+
+  3/05/2026 10:17:41 AM: Starting composition “beneficiaries”.
+
+  Output To: C:\Users\Savva Tsekmes\Desktop\beneficiaries_[#####].png    3/05/2026 10:17:41 AM: Finished composition “beneficiaries”.
+
+
+  3/05/2026 10:17:41 AM: Starting composition “cryptoseeds”.
+
+  Output To: C:\Users\Savva Tsekmes\Desktop\cryptoseeds_[#####].png    3/05/2026 10:17:41 AM: Finished composition “cryptoseeds”.
+
+
+  3/05/2026 10:17:41 AM: Starting composition “documents”.
+
+  Output To: C:\Users\Savva Tsekmes\Desktop\documents_[#####].png    3/05/2026 10:17:41 AM: Finished composition “documents”.
+
+
+  3/05/2026 10:17:41 AM: Starting composition “images”.
+
+  Output To: C:\Users\Savva Tsekmes\Desktop\images_[#####].png    3/05/2026 10:17:41 AM: Finished composition “images”.
+
+
+  3/05/2026 10:17:41 AM: Starting composition “myvault”.
+
+  Output To: C:\Users\Savva Tsekmes\Desktop\myvault_[#####].png    3/05/2026 10:17:41 AM: Finished composition “myvault”.
+
+
+  3/05/2026 10:17:41 AM: Starting composition “passwords”.
+
+  Output To: C:\Users\Savva Tsekmes\Desktop\passwords_[#####].png    3/05/2026 10:17:41 AM: Finished composition “passwords”.
+
+
+  3/05/2026 10:17:41 AM: Starting composition “personal”.
+
+  Output To: C:\Users\Savva Tsekmes\Desktop\personal_[#####].png    3/05/2026 10:17:41 AM: Finished composition “personal”.
+
+
+  3/05/2026 10:17:41 AM: Starting composition “recoverycards”.
+
+  Output To: C:\Users\Savva Tsekmes\Desktop\recoverycards_[#####].png    3/05/2026 10:17:41 AM: Finished composition “recoverycards”.
+
+
+  3/05/2026 10:17:41 AM: Starting composition “settings”.
+
+  Output To: C:\Users\Savva Tsekmes\Desktop\settings_[#####].png    3/05/2026 10:17:41 AM: Finished composition “settings”.
+
+
+  Total Time Elapsed: 0 Seconds
+Log closed on 3/05/2026 at 10:17:41 AM
+

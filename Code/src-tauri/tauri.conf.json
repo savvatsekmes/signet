@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Signet",
+  "version": "1.0.0",
+  "identifier": "com.signetvault.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Signet",
+        "width": 900,
+        "height": 620,
+        "minWidth": 800,
+        "minHeight": 560,
+        "decorations": false,
+        "transparent": false,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "Signet",
+    "category": "Utility",
+    "shortDescription": "Local encrypted vault for the people you leave behind.",
+    "longDescription": "Signet is a local-first encrypted file vault designed to ensure that when you die, the people you love can access everything they need — passwords, documents, crypto seeds, personal messages — without being locked out. No servers. No cloud. No subscriptions. Vault key is split with Shamir's Secret Sharing so any K of N keyholders can recover it.",
+    "homepage": "https://signetvault.com",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "installMode": "perMachine",
+        "languages": ["English"],
+        "displayLanguageSelector": false
+      }
+    }
+  }
+}

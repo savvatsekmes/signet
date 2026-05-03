@@ -1,0 +1,39 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Build output
+Code/dist
+Code/dist-ssr
+*.local
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+
+# Node
+Code/node_modules
+
+# Tauri / Rust
+Code/src-tauri/target
+Code/src-tauri/Cargo.lock
+Code/src-tauri/gen
+
+# Vault data — never commit user vaults or pointer files
+*.sgt
+*.signet
+last_vault.txt
+Code/dist-usb/Signet.exe
+Code/dist-usb/recovery/
+
+# Built portable / installer artefacts
+Code/dist-usb/*.exe

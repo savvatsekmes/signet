@@ -1,0 +1,10 @@
+pub mod beneficiaries;
+pub mod documents;
+pub mod export;
+pub mod files;
+pub mod passwords;
+pub mod seeds;
+pub mod settings;
+pub mod shamir;
+pub mod updates;
+pub mod vault;

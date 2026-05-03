@@ -1,0 +1,88 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:24px;display:flex;justify-content:center}
+.screen{width:520px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.titlebar{display:flex;align-items:center;padding:0 14px;height:36px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.tb-logo{display:flex;align-items:center;gap:7px}
+.tb-logo-mark{width:16px;height:16px;border-radius:4px;background:#1a0a0a;display:flex;align-items:center;justify-content:center}
+.tb-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.tb-spacer{flex:1}
+.tb-controls{display:flex;align-items:center;gap:2px}
+.tb-btn{width:28px;height:28px;border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-text-tertiary)}
+.tb-btn:hover{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.tb-btn.close:hover{background:#c0392b;color:#fff}
+.body{padding:28px 40px 32px}
+.steps{display:flex;align-items:center;margin-bottom:28px}
+.step{display:flex;align-items:center;gap:7px;font-size:11px}
+.step-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500}
+.step-active .step-num{background:#1a0a0a;color:#f5f0eb}
+.step-done .step-num{background:var(--color-background-success);color:var(--color-text-success)}
+.step-inactive .step-num{background:var(--color-background-tertiary);color:var(--color-text-tertiary)}
+.step-active .step-label{color:var(--color-text-primary);font-weight:500}
+.step-done .step-label{color:var(--color-text-success)}
+.step-inactive .step-label{color:var(--color-text-tertiary)}
+.step-line{flex:1;height:0.5px;background:var(--color-border-tertiary);margin:0 8px}
+.section-title{font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px}
+.section-sub{font-size:12px;color:var(--color-text-tertiary);margin-bottom:22px;line-height:1.6}
+.field-label{font-size:10px;font-weight:500;color:var(--color-text-secondary);margin-bottom:5px;letter-spacing:0.4px;text-transform:uppercase}
+.field{width:100%;height:36px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);padding:0 12px;font-size:12px;color:var(--color-text-tertiary);margin-bottom:12px;display:flex;align-items:center}
+.strength{display:flex;gap:4px;margin-bottom:18px;align-items:center}
+.bar{height:2.5px;flex:1;border-radius:2px}
+.strength-label{font-size:11px;color:var(--color-text-tertiary);margin-left:8px;white-space:nowrap}
+.info-box{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:11px 13px;margin-bottom:22px;font-size:12px;color:var(--color-text-secondary);line-height:1.6}
+.info-box strong{color:var(--color-text-primary);font-weight:500}
+.btn-row{display:flex;justify-content:flex-end;gap:10px}
+.btn-secondary{height:34px;padding:0 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;font-size:12px;color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center}
+.btn-primary{height:34px;padding:0 16px;border-radius:var(--border-radius-md);background:#1a0a0a;color:#f5f0eb;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;border:none}
+</style>
+<div class="wrap">
+<div class="screen">
+  <div class="titlebar">
+    <div class="tb-logo">
+      <div class="tb-logo-mark">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="4" r="2.5" stroke="#8B1A1A" stroke-width="1" opacity="0.5"/><path d="M4 4.5L5.5 6M6 4.5L4.5 6" stroke="#f5f0eb" stroke-width="1" stroke-linecap="round"/></svg>
+      </div>
+      <div class="tb-name">Signet — Setup</div>
+    </div>
+    <div class="tb-spacer"></div>
+    <div class="tb-controls">
+      <div class="tb-btn"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="4.5" width="8" height="1" rx="0.5" fill="currentColor"/></svg></div>
+      <div class="tb-btn"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1.5" y="1.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1"/></svg></div>
+      <div class="tb-btn close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+    </div>
+  </div>
+  <div class="body">
+    <div class="steps">
+      <div class="step step-done"><div class="step-num">✓</div><div class="step-label">Welcome</div></div>
+      <div class="step-line"></div>
+      <div class="step step-active"><div class="step-num">2</div><div class="step-label">Master password</div></div>
+      <div class="step-line"></div>
+      <div class="step step-inactive"><div class="step-num">3</div><div class="step-label">Beneficiaries</div></div>
+      <div class="step-line"></div>
+      <div class="step step-inactive"><div class="step-num">4</div><div class="step-label">Recovery</div></div>
+    </div>
+    <div class="section-title">Set your master password</div>
+    <div class="section-sub">This password encrypts everything in your Signet vault. It is never stored anywhere — not on your device, not on any server. If you lose it, the vault cannot be opened.</div>
+    <div class="field-label">Master password</div>
+    <div class="field">At least 16 characters recommended</div>
+    <div class="field-label">Confirm password</div>
+    <div class="field">Type it again</div>
+    <div class="strength">
+      <div class="bar" style="background:#8B1A1A"></div>
+      <div class="bar" style="background:#8B1A1A"></div>
+      <div class="bar" style="background:#8B1A1A"></div>
+      <div class="bar" style="background:var(--color-border-tertiary)"></div>
+      <div class="bar" style="background:var(--color-border-tertiary)"></div>
+      <div class="strength-label">Strong</div>
+    </div>
+    <div class="info-box">
+      <strong>How Signet protects you.</strong> Your password is run through Argon2id — a memory-hard algorithm that makes brute-force attacks extremely expensive. Your vault uses XChaCha20-Poly1305 authenticated encryption. Nobody can read your files.
+    </div>
+    <div class="btn-row">
+      <div class="btn-secondary">Back</div>
+      <div class="btn-primary">Continue →</div>
+    </div>
+  </div>
+</div>
+</div>

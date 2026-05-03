@@ -1,0 +1,144 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:16px}
+.screen{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;display:grid;grid-template-columns:200px 1fr;grid-template-rows:36px 1fr;min-height:520px}
+.titlebar{grid-column:1/-1;display:flex;align-items:center;padding:0 14px;height:36px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.tb-logo{display:flex;align-items:center;gap:7px}
+.tb-logo-mark{width:16px;height:16px;border-radius:4px;background:#1a0a0a;display:flex;align-items:center;justify-content:center}
+.tb-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.tb-spacer{flex:1}
+.tb-controls{display:flex;align-items:center;gap:2px}
+.tb-btn{width:28px;height:28px;border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-text-tertiary)}
+.tb-btn:hover{background:var(--color-background-secondary)}
+.tb-btn.close:hover{background:#c0392b;color:#fff}
+.sidebar{background:var(--color-background-secondary);border-right:0.5px solid var(--color-border-tertiary);padding:12px 0}
+.nav{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--border-radius-md);cursor:pointer;font-size:11.5px;color:var(--color-text-secondary);margin:0 8px 2px}
+.nav.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;border:0.5px solid var(--color-border-tertiary)}
+.nav-icon{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+.sb-label{font-size:9px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px;padding:0 14px}
+.main{display:flex;flex-direction:column;overflow:hidden}
+.main-header{padding:14px 18px 12px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center}
+.main-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.main-sub{font-size:11px;color:var(--color-text-tertiary);margin-top:1px}
+.btn-sm-primary{font-size:11px;padding:5px 12px;border-radius:var(--border-radius-md);background:#1a0a0a;color:#f5f0eb;cursor:pointer;font-weight:500;margin-left:auto}
+.main-body{padding:16px 18px;overflow:auto;flex:1}
+.shamir-box{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:14px;margin-bottom:16px}
+.shamir-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.shamir-sub{font-size:11px;color:var(--color-text-tertiary);margin-bottom:14px;line-height:1.5}
+.shamir-controls{display:flex;gap:16px;align-items:flex-start}
+.shamir-field{display:flex;flex-direction:column;gap:4px}
+.shamir-label{font-size:10px;color:var(--color-text-tertiary)}
+.shamir-value{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.shamir-stepper{display:flex;gap:6px;margin-top:4px}
+.step-btn{width:26px;height:26px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--color-text-secondary)}
+.shamir-visual{display:flex;gap:6px;align-items:center;flex:1;padding-top:4px}
+.shard-circle{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500}
+.shamir-explanation{font-size:11px;color:var(--color-text-secondary);margin-top:12px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary);line-height:1.6}
+.shamir-explanation strong{color:var(--color-text-primary)}
+.sh{font-size:9px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.bene-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px 14px;margin-bottom:8px}
+.bene-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;flex-shrink:0}
+.shard-badge{background:#1a0a0a;color:#f5f0eb;font-size:10px;padding:3px 10px;border-radius:8px}
+.pill{font-size:9px;padding:2px 8px;border-radius:8px;font-weight:500;margin-left:8px}
+.access-pills{display:flex;gap:6px;flex-wrap:wrap}
+.access-pill{font-size:10px;padding:3px 10px;border-radius:8px}
+.bene-actions{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--color-border-tertiary)}
+.action-btn{font-size:10px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer}
+</style>
+<div class="wrap">
+<div class="screen">
+  <div class="titlebar">
+    <div class="tb-logo">
+      <div class="tb-logo-mark">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="4" r="2.5" stroke="#8B1A1A" stroke-width="1" opacity="0.5"/><path d="M4 4.5L5.5 6M6 4.5L4.5 6" stroke="#f5f0eb" stroke-width="1" stroke-linecap="round"/></svg>
+      </div>
+      <div class="tb-name">Signet — Beneficiaries</div>
+    </div>
+    <div class="tb-spacer"></div>
+    <div class="tb-controls">
+      <div class="tb-btn"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="4.5" width="8" height="1" rx="0.5" fill="currentColor"/></svg></div>
+      <div class="tb-btn"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1.5" y="1.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1"/></svg></div>
+      <div class="tb-btn close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+    </div>
+  </div>
+  <div class="sidebar">
+    <div class="sb-label" style="margin-bottom:8px">Vault</div>
+    <div class="nav"><div class="nav-icon" style="background:#E6F1FB"></div>My vault</div>
+    <div class="nav active"><div class="nav-icon" style="background:#E1F5EE"></div>Beneficiaries</div>
+    <div class="nav"><div class="nav-icon" style="background:#FAEEDA"></div>Recovery sheet</div>
+    <div class="nav"><div class="nav-icon" style="background:var(--color-background-tertiary)"></div>Settings</div>
+  </div>
+  <div class="main">
+    <div class="main-header">
+      <div><div class="main-title">Beneficiaries & key shards</div><div class="main-sub">2 people · 2-of-3 key split active</div></div>
+      <div class="btn-sm-primary">+ Add beneficiary</div>
+    </div>
+    <div class="main-body">
+      <div class="shamir-box">
+        <div class="shamir-title">Shamir key splitting</div>
+        <div class="shamir-sub">Your vault key is split into shards. Any 2 people must come together to unlock — no single person can open it alone.</div>
+        <div class="shamir-controls">
+          <div class="shamir-field">
+            <div class="shamir-label">Total shards</div>
+            <div class="shamir-value">3</div>
+            <div class="shamir-stepper"><div class="step-btn">−</div><div class="step-btn">+</div></div>
+          </div>
+          <div style="font-size:18px;color:var(--color-text-tertiary);padding-top:16px">of</div>
+          <div class="shamir-field">
+            <div class="shamir-label">Required to unlock</div>
+            <div class="shamir-value">2</div>
+            <div class="shamir-stepper"><div class="step-btn">−</div><div class="step-btn">+</div></div>
+          </div>
+          <div style="flex:1;padding-top:4px">
+            <div class="shamir-visual">
+              <div class="shard-circle" style="background:#1a0a0a;color:#f5f0eb">1</div>
+              <div class="shard-circle" style="background:#1a0a0a;color:#f5f0eb">2</div>
+              <div class="shard-circle" style="background:var(--color-background-tertiary);border:0.5px dashed var(--color-border-secondary);color:var(--color-text-tertiary)">3</div>
+            </div>
+            <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:6px">Any 2 of 3 unlocks the vault</div>
+          </div>
+        </div>
+        <div class="shamir-explanation">Each shard is <strong>mathematically worthless alone</strong> — reveals zero information below the threshold. Losing one shard is not catastrophic.</div>
+      </div>
+      <div class="sh">Keyholders</div>
+      <div class="bene-card">
+        <div class="bene-top">
+          <div class="avatar" style="background:var(--color-background-info);color:var(--color-text-info)">AY</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Aysha</div><div style="font-size:10px;color:var(--color-text-tertiary)">Primary · aysha@email.com</div></div>
+          <div class="shard-badge">Shard 1</div>
+          <div class="pill" style="background:var(--color-background-success);color:var(--color-text-success)">Card printed</div>
+        </div>
+        <div class="access-pills">
+          <div class="access-pill" style="background:#FAECE7;color:#712B13">Documents</div>
+          <div class="access-pill" style="background:#EEEDFE;color:#3C3489">Passwords</div>
+          <div class="access-pill" style="background:#EAF3DE;color:#27500A">Crypto</div>
+          <div class="access-pill" style="background:#FBEAF0;color:#72243E">Personal</div>
+        </div>
+        <div class="bene-actions">
+          <div class="action-btn">Edit access</div>
+          <div class="action-btn">Reprint card</div>
+          <div class="action-btn" style="color:var(--color-text-danger);border-color:var(--color-border-danger)">Remove</div>
+        </div>
+      </div>
+      <div class="bene-card">
+        <div class="bene-top">
+          <div class="avatar" style="background:var(--color-background-warning);color:var(--color-text-warning)">FR</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Fran</div><div style="font-size:10px;color:var(--color-text-tertiary)">Secondary · fran@email.com</div></div>
+          <div class="shard-badge">Shard 2</div>
+          <div class="pill" style="background:var(--color-background-warning);color:var(--color-text-warning)">Card pending</div>
+        </div>
+        <div class="access-pills">
+          <div class="access-pill" style="background:#FAECE7;color:#712B13">Documents</div>
+        </div>
+        <div class="bene-actions">
+          <div class="action-btn">Edit access</div>
+          <div class="action-btn" style="background:#1a0a0a;color:#f5f0eb;border:none">Print card</div>
+          <div class="action-btn" style="color:var(--color-text-danger);border-color:var(--color-border-danger)">Remove</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

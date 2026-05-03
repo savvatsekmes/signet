@@ -21,7 +21,9 @@ Signet/
 │   ├── dist-usb/        # USB-ready layout (README.txt + recovery folder)
 │   └── README.md        # Build / develop instructions
 ├── Design/              # Source artwork (logo, icons, mockups)
-└── SIGNET_MASTER.md     # Original full spec (Phases 1–6)
+└── Docs/
+    ├── SIGNET_MASTER.md           # Original full spec (Phases 1–6)
+    └── signet_*_v2.html           # Original HTML mockups
 ```
 
 See [Code/README.md](Code/README.md) for build instructions.

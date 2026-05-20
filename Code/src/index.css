@@ -2056,6 +2056,132 @@ input:focus {
   overflow: visible;
 }
 
+/* Legal documents (Terms / Privacy) modal */
+
+.legal-modal {
+  width: 720px;
+  max-width: 100%;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.legal-modal-body {
+  flex: 1;
+  overflow: auto;
+  padding: 20px 28px 24px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.legal-modal-body h1 {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 12px;
+}
+
+.legal-modal-body h2 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 18px 0 8px;
+}
+
+.legal-modal-body h3 {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 14px 0 6px;
+}
+
+.legal-modal-body p {
+  margin: 0 0 10px;
+}
+
+.legal-modal-body ul {
+  margin: 0 0 10px 20px;
+  padding: 0;
+}
+
+.legal-modal-body li {
+  margin-bottom: 4px;
+}
+
+.legal-modal-body strong {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.legal-modal-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  background: var(--color-bg-secondary);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.legal-modal-body blockquote {
+  margin: 8px 0 12px;
+  padding: 10px 14px;
+  background: var(--color-bg-secondary);
+  border-left: 3px solid var(--color-wax);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--color-text-primary);
+  font-size: 12px;
+}
+
+.legal-modal-body hr {
+  border: none;
+  border-top: 0.5px solid var(--color-border-light);
+  margin: 18px 0;
+}
+
+/* ToS acceptance row in the wizard */
+
+.tos-accept-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--color-bg-secondary);
+  border: 0.5px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  margin-top: 18px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.tos-accept-row input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.tos-accept-row label {
+  cursor: pointer;
+}
+
+.tos-accept-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.tos-accept-link:hover {
+  color: var(--color-wax);
+}
+
 /* ───────── Update available toast ───────── */
 
 .update-toast {

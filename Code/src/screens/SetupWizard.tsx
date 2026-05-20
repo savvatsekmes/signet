@@ -14,6 +14,9 @@ import {
 import { WizardSteps } from "../components/WizardSteps";
 import { StrengthMeter, evaluateStrength } from "../components/StrengthMeter";
 import { ShamirControls } from "../components/ShamirControls";
+import { LegalModal } from "../components/LegalModal";
+import termsMarkdown from "../assets/legal/terms.md?raw";
+import privacyMarkdown from "../assets/legal/privacy.md?raw";
 
 interface DraftBeneficiary {
   name: string;
@@ -39,6 +42,9 @@ export function SetupWizard() {
 
   const [stepIndex, setStepIndex] = useState(0);
   const [openExistingError, setOpenExistingError] = useState<string | null>(null);
+  const [tosAccepted, setTosAccepted] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const onOpenExisting = async () => {
     setOpenExistingError(null);
@@ -283,6 +289,32 @@ export function SetupWizard() {
                 <li>No servers. No cloud. No subscriptions.</li>
               </ul>
             </div>
+            <label className="tos-accept-row">
+              <input
+                type="checkbox"
+                checked={tosAccepted}
+                onChange={(e) => setTosAccepted(e.target.checked)}
+              />
+              <span>
+                I have read and accept the{" "}
+                <button
+                  type="button"
+                  className="tos-accept-link"
+                  onClick={() => setShowTerms(true)}
+                >
+                  Terms of Service
+                </button>{" "}
+                and{" "}
+                <button
+                  type="button"
+                  className="tos-accept-link"
+                  onClick={() => setShowPrivacy(true)}
+                >
+                  Privacy Policy
+                </button>
+                .
+              </span>
+            </label>
             <div className="wizard-actions">
               <button
                 type="button"
@@ -291,7 +323,17 @@ export function SetupWizard() {
               >
                 Open an existing vault…
               </button>
-              <button type="button" className="btn-primary" onClick={next}>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={next}
+                disabled={!tosAccepted}
+                title={
+                  !tosAccepted
+                    ? "Please accept the Terms and Privacy Policy first"
+                    : undefined
+                }
+              >
                 Begin setup →
               </button>
             </div>
@@ -302,6 +344,20 @@ export function SetupWizard() {
               >
                 {openExistingError}
               </div>
+            )}
+            {showTerms && (
+              <LegalModal
+                title="Terms of Service"
+                markdown={termsMarkdown}
+                onClose={() => setShowTerms(false)}
+              />
+            )}
+            {showPrivacy && (
+              <LegalModal
+                title="Privacy Policy"
+                markdown={privacyMarkdown}
+                onClose={() => setShowPrivacy(false)}
+              />
             )}
           </div>
         )}

@@ -93,6 +93,32 @@ pub async fn set_last_vault_path(path: String) -> Result<(), String> {
     Ok(())
 }
 
+/// Returns the version string the user previously chose to skip, if any.
+#[tauri::command]
+pub async fn get_skipped_update_version() -> Result<Option<String>, String> {
+    let path = config_dir()?.join("skipped_update.txt");
+    if !path.exists() {
+        return Ok(None);
+    }
+    let raw = std::fs::read_to_string(&path)
+        .map_err(|e| format!("Failed to read config: {}", e))?;
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        Ok(None)
+    } else {
+        Ok(Some(trimmed.to_string()))
+    }
+}
+
+/// Persist the version the user clicked "Skip" on; we'll stop nagging until a
+/// newer version comes out. Pass an empty string to clear it.
+#[tauri::command]
+pub async fn set_skipped_update_version(version: String) -> Result<(), String> {
+    let cfg = config_dir()?.join("skipped_update.txt");
+    std::fs::write(&cfg, version).map_err(|e| format!("Failed to save config: {}", e))?;
+    Ok(())
+}
+
 #[tauri::command]
 pub async fn get_display_name(path: String) -> Result<Option<String>, String> {
     format::read_display_name(&path)

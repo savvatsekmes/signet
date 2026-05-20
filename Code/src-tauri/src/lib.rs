@@ -26,8 +26,9 @@ use commands::shamir::{configure_shamir, generate_shards, reconstruct_from_shard
 use commands::updates::{check_for_update, get_app_version};
 use commands::vault::{
     create_vault, default_vault_path, get_display_name, get_last_vault_path,
-    get_lockout_state, get_vault_meta, lock_vault, set_display_name, set_last_vault_path,
-    unlock_vault, vault_exists,
+    get_lockout_state, get_skipped_update_version, get_vault_meta, lock_vault,
+    set_display_name, set_last_vault_path, set_skipped_update_version, unlock_vault,
+    vault_exists,
 };
 use state::AppState;
 
@@ -52,6 +53,8 @@ pub fn run() {
             get_last_vault_path,
             set_last_vault_path,
             get_lockout_state,
+            get_skipped_update_version,
+            set_skipped_update_version,
             add_file,
             list_files,
             get_file,

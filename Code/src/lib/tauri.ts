@@ -264,6 +264,10 @@ export const tauri = {
   // Updates
   getAppVersion: () => invoke<string>("get_app_version"),
   checkForUpdate: () => invoke<UpdateInfo>("check_for_update"),
+  getSkippedUpdateVersion: () =>
+    invoke<string | null>("get_skipped_update_version"),
+  setSkippedUpdateVersion: (version: string) =>
+    invoke<void>("set_skipped_update_version", { version }),
 };
 
 export interface UpdateInfo {

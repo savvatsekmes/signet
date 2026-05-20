@@ -84,7 +84,6 @@ export function PasswordForm({ initial, onSubmit, onCancel, onDelete }: Props) {
           <input
             id="pw-url"
             className="password-input"
-            type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://gmail.com"

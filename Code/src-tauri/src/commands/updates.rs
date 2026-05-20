@@ -1,17 +1,30 @@
 use serde::{Deserialize, Serialize};
 
-/// Endpoint expected to return JSON of shape:
-///   { "version": "1.2.3", "url": "https://signetvault.com/download", "notes": "..." }
-/// Replace this URL with the real one when releases go live.
-const UPDATE_URL: &str = "https://signetvault.com/version.json";
+/// GitHub Releases API — returns the latest published (non-draft, non-prerelease)
+/// release for the repo. Change the path here if you fork the repo.
+const UPDATE_URL: &str =
+    "https://api.github.com/repos/savvatsekmes/signet/releases/latest";
+
+/// Preferred asset filename. If GitHub lists an asset with this exact name we
+/// link to its direct download URL; otherwise we fall back to the release page.
+const PREFERRED_ASSET: &str = "Signet.exe";
 
 #[derive(Deserialize)]
-struct Release {
-    version: String,
+struct GithubAsset {
+    name: String,
+    browser_download_url: String,
+}
+
+#[derive(Deserialize)]
+struct GithubRelease {
+    tag_name: String,
+    html_url: String,
     #[serde(default)]
-    url: Option<String>,
+    name: Option<String>,
     #[serde(default)]
-    notes: Option<String>,
+    body: Option<String>,
+    #[serde(default)]
+    assets: Vec<GithubAsset>,
 }
 
 #[derive(Serialize)]
@@ -32,31 +45,52 @@ pub fn get_app_version() -> String {
 #[tauri::command]
 pub async fn check_for_update() -> Result<UpdateInfo, String> {
     let current = env!("CARGO_PKG_VERSION").to_string();
-    let result = tokio::task::spawn_blocking(move || -> Result<Release, String> {
+    let release = tokio::task::spawn_blocking(move || -> Result<GithubRelease, String> {
         let agent = ureq::AgentBuilder::new()
             .timeout_connect(std::time::Duration::from_secs(8))
             .timeout_read(std::time::Duration::from_secs(8))
             .build();
         let resp = agent
             .get(UPDATE_URL)
-            .set("User-Agent", "Signet/1.0")
+            // GitHub requires a User-Agent on every request.
+            .set("User-Agent", "Signet-Updater")
+            .set("Accept", "application/vnd.github+json")
             .call()
-            .map_err(|e| format!("Cannot reach update server: {}", e))?;
-        let release: Release = resp
-            .into_json()
-            .map_err(|e| format!("Invalid response from update server: {}", e))?;
-        Ok(release)
+            .map_err(|e| format!("Cannot reach GitHub: {}", e))?;
+        resp.into_json::<GithubRelease>()
+            .map_err(|e| format!("Invalid response from GitHub: {}", e))
     })
     .await
     .map_err(|e| format!("Update check task error: {}", e))??;
 
-    let update_available = is_newer(&result.version, &current);
+    // Strip the conventional leading "v" from tags (v1.2.3 → 1.2.3) before comparing.
+    let latest_version = release.tag_name.trim_start_matches(['v', 'V']).to_string();
+    let update_available = is_newer(&latest_version, &current);
+
+    // Prefer the portable .exe if it's published as an asset; else fall back to the release page.
+    let download_url = if update_available {
+        let direct = release
+            .assets
+            .iter()
+            .find(|a| a.name.eq_ignore_ascii_case(PREFERRED_ASSET))
+            .map(|a| a.browser_download_url.clone());
+        Some(direct.unwrap_or(release.html_url.clone()))
+    } else {
+        None
+    };
+
+    let notes = if update_available {
+        release.body.or(release.name)
+    } else {
+        None
+    };
+
     Ok(UpdateInfo {
         current_version: current,
-        latest_version: result.version,
+        latest_version,
         update_available,
-        download_url: if update_available { result.url } else { None },
-        notes: if update_available { result.notes } else { None },
+        download_url,
+        notes,
         checked_at: chrono::Utc::now().to_rfc3339(),
     })
 }

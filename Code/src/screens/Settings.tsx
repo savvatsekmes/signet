@@ -392,8 +392,9 @@ export function Settings() {
           <div className="settings-section-title">Updates</div>
           <div className="settings-section-sub">
             Signet doesn't phone home automatically. Click below to make a
-            single network request to <span className="mono">signetvault.com</span> to
-            see if a newer version is available.
+            single network request to{" "}
+            <span className="mono">api.github.com</span> and check the latest
+            release published on the project's GitHub repo.
           </div>
           <div className="settings-row">
             <div className="settings-row-value">

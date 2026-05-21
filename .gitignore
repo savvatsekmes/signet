@@ -37,3 +37,6 @@ Code/dist-usb/recovery/
 
 # Built portable / installer artefacts
 Code/dist-usb/*.exe
+
+# Marketing site lives in its own repo — not tracked here
+Website/

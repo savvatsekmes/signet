@@ -357,6 +357,26 @@ input:focus {
   font-weight: 500;
 }
 
+/* Lighter informational banner — vault requires a YubiKey */
+.yubikey-required-banner {
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-tertiary);
+  border: 0.5px solid var(--color-border-medium);
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.yubikey-required-banner strong {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
 /* Vault file picker — matches the master-password input row */
 
 .vault-file-input {

@@ -8,3 +8,4 @@ pub mod settings;
 pub mod shamir;
 pub mod updates;
 pub mod vault;
+pub mod yubikey;

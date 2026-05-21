@@ -30,6 +30,7 @@ use commands::vault::{
     set_display_name, set_last_vault_path, set_skipped_update_version, unlock_vault,
     vault_exists,
 };
+use commands::yubikey::{vault_has_yubikey, yubikey_disable, yubikey_enable, yubikey_is_present};
 use state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -94,6 +95,10 @@ pub fn run() {
             delete_vault,
             get_app_version,
             check_for_update,
+            vault_has_yubikey,
+            yubikey_is_present,
+            yubikey_enable,
+            yubikey_disable,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Signet");

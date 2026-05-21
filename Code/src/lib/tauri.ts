@@ -261,6 +261,15 @@ export const tauri = {
     invoke<void>("show_in_file_explorer", { path }),
   deleteVault: () => invoke<void>("delete_vault"),
 
+  // YubiKey (FIDO2 hmac-secret 2FA)
+  vaultHasYubikey: (path: string) =>
+    invoke<boolean>("vault_has_yubikey", { path }),
+  yubikeyIsPresent: () => invoke<boolean>("yubikey_is_present"),
+  yubikeyEnable: (password: string) =>
+    invoke<void>("yubikey_enable", { password }),
+  yubikeyDisable: (password: string) =>
+    invoke<void>("yubikey_disable", { password }),
+
   // Updates
   getAppVersion: () => invoke<string>("get_app_version"),
   checkForUpdate: () => invoke<UpdateInfo>("check_for_update"),

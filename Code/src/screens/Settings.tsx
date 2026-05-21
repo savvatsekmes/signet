@@ -158,6 +158,52 @@ export function Settings() {
     }
   };
 
+  // Hardware key (YubiKey / FIDO2)
+  const [ykEnabled, setYkEnabled] = useState<boolean | null>(null);
+  const [ykPresent, setYkPresent] = useState<boolean | null>(null);
+  const [ykBusy, setYkBusy] = useState(false);
+  const [ykError, setYkError] = useState<string | null>(null);
+  const [ykPassword, setYkPassword] = useState("");
+  const [ykMode, setYkMode] = useState<"idle" | "enable" | "disable">("idle");
+
+  useEffect(() => {
+    if (!vaultPath) return;
+    tauri
+      .vaultHasYubikey(vaultPath)
+      .then(setYkEnabled)
+      .catch(() => setYkEnabled(null));
+  }, [vaultPath]);
+
+  const refreshYkPresence = async () => {
+    try {
+      setYkPresent(await tauri.yubikeyIsPresent());
+    } catch {
+      setYkPresent(false);
+    }
+  };
+
+  const onSubmitYk = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ykPassword) return;
+    setYkError(null);
+    setYkBusy(true);
+    try {
+      if (ykMode === "enable") {
+        await tauri.yubikeyEnable(ykPassword);
+        setYkEnabled(true);
+      } else if (ykMode === "disable") {
+        await tauri.yubikeyDisable(ykPassword);
+        setYkEnabled(false);
+      }
+      setYkPassword("");
+      setYkMode("idle");
+    } catch (err) {
+      setYkError(typeof err === "string" ? err : "YubiKey operation failed");
+    } finally {
+      setYkBusy(false);
+    }
+  };
+
   // Delete vault
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleteBusy, setDeleteBusy] = useState(false);
@@ -384,6 +430,129 @@ export function Settings() {
               New shards generated. Reprint every recovery card from the
               Recovery cards screen.
             </div>
+          )}
+        </div>
+
+        {/* Hardware key (YubiKey) */}
+        <div className="settings-section">
+          <div className="settings-section-title">
+            Hardware key (YubiKey) — 2-factor unlock
+          </div>
+          <div className="settings-section-sub">
+            Require a physical FIDO2 security key in addition to your master
+            password. The key's secret never leaves the device — without it,
+            even the correct password cannot decrypt the vault.
+            <br />
+            <strong>Recovery still works:</strong> if you lose your YubiKey,
+            beneficiaries can reconstruct the vault via Shamir cards as
+            before.
+          </div>
+
+          {ykEnabled === null ? (
+            <div className="settings-hint">Checking vault…</div>
+          ) : ykEnabled ? (
+            <div className="settings-row">
+              <div className="settings-row-value">
+                <strong>Enabled.</strong> Your YubiKey is required on every
+                unlock.
+              </div>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  setYkMode("disable");
+                  setYkError(null);
+                  setYkPassword("");
+                  refreshYkPresence();
+                }}
+                disabled={ykMode !== "idle"}
+              >
+                Remove YubiKey
+              </button>
+            </div>
+          ) : (
+            <div className="settings-row">
+              <div className="settings-row-value">
+                <strong>Not enabled.</strong> Vault is protected by your
+                master password only.
+              </div>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  setYkMode("enable");
+                  setYkError(null);
+                  setYkPassword("");
+                  refreshYkPresence();
+                }}
+                disabled={ykMode !== "idle"}
+              >
+                Enable YubiKey
+              </button>
+            </div>
+          )}
+
+          {ykMode !== "idle" && (
+            <form onSubmit={onSubmitYk} className="settings-form" style={{ marginTop: 12 }}>
+              <div className="info-box">
+                {ykMode === "enable" ? (
+                  <>
+                    <strong>Insert your YubiKey now</strong> and have it ready
+                    to tap. After you click below, the key will glow — touch
+                    the gold disc to confirm enrolment.
+                  </>
+                ) : (
+                  <>
+                    <strong>Insert the currently-enrolled YubiKey.</strong>{" "}
+                    You'll be asked to tap it to authorise removal.
+                  </>
+                )}
+              </div>
+              {ykPresent === false && (
+                <div className="settings-hint">
+                  No YubiKey detected. Plug one in and click below — Signet will
+                  re-check.
+                </div>
+              )}
+              <label className="field-label" htmlFor="yk-pw" style={{ marginTop: 8 }}>
+                Master password
+              </label>
+              <input
+                id="yk-pw"
+                className="password-input"
+                type="password"
+                value={ykPassword}
+                onChange={(e) => setYkPassword(e.target.value)}
+                spellCheck={false}
+                autoComplete="current-password"
+              />
+              <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={ykBusy || ykPassword.length === 0}
+                >
+                  {ykBusy
+                    ? "Working…"
+                    : ykMode === "enable"
+                    ? "Enrol YubiKey"
+                    : "Remove YubiKey"}
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setYkMode("idle");
+                    setYkPassword("");
+                    setYkError(null);
+                  }}
+                  disabled={ykBusy}
+                >
+                  Cancel
+                </button>
+              </div>
+              {ykError && <div className="settings-error">{ykError}</div>}
+            </form>
           )}
         </div>
 

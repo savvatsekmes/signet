@@ -59,8 +59,22 @@ export function LockScreen() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [lockout, setLockout] = useState<LockoutInfo | null>(null);
+  const [requiresYubikey, setRequiresYubikey] = useState(false);
   const { vaultPath, displayName, setMeta, setRoute, setVaultPath, setDisplayName } =
     useVaultStore();
+
+  // Detect whether the selected vault has a YubiKey enrolled, so we can warn
+  // the user to plug it in before they try to unlock.
+  useEffect(() => {
+    if (!vaultPath) {
+      setRequiresYubikey(false);
+      return;
+    }
+    tauri
+      .vaultHasYubikey(vaultPath)
+      .then(setRequiresYubikey)
+      .catch(() => setRequiresYubikey(false));
+  }, [vaultPath]);
 
   // Poll lockout state — frequently while locked (so the countdown ticks),
   // less often when not.
@@ -199,6 +213,13 @@ export function LockScreen() {
           </div>
         )}
 
+        {requiresYubikey && (
+          <div className="yubikey-required-banner">
+            <strong>YubiKey required.</strong> Plug in your hardware key
+            before unlocking — you'll be asked to tap it after the password.
+          </div>
+        )}
+
         <label className="field-label" htmlFor="master-password">
           Master password
         </label>
@@ -297,7 +318,7 @@ export function LockScreen() {
             Open with recovery shards
           </button>
         </div>
-        <div className="version">signetvault.com · v1.0.0</div>
+        <div className="version">signetvault.com · v1.0.1</div>
       </form>
     </div>
   );

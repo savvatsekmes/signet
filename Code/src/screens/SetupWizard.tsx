@@ -438,6 +438,14 @@ export function SetupWizard() {
               authenticated encryption. Nobody can read your files.
             </div>
 
+            <div className="info-box" style={{ marginTop: 8 }}>
+              <strong>Own a YubiKey or other FIDO2 key?</strong> After
+              finishing setup you can require it for every unlock from{" "}
+              <em>Settings → Hardware key</em>. Your master password alone
+              won't be enough — a physical key tap is too. Shamir recovery
+              still works without the YubiKey.
+            </div>
+
             <div className="wizard-actions">
               <button type="button" className="btn-secondary" onClick={back}>
                 Back

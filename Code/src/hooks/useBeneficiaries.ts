@@ -21,8 +21,8 @@ export function useBeneficiaries() {
   }, [setBeneficiaries]);
 
   const add = useCallback(
-    async (name: string, email: string, access: string[]) => {
-      await tauri.addBeneficiary(name, email, access);
+    async (name: string, email: string) => {
+      await tauri.addBeneficiary(name, email, []);
       await refresh();
     },
     [refresh]

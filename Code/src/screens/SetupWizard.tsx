@@ -5,7 +5,6 @@ import logoUrl from "../assets/signet-logo.png";
 import wordmarkUrl from "../assets/signet-wordmark.png";
 import { tauri } from "../lib/tauri";
 import { useVaultStore } from "../store/vaultStore";
-import { CATEGORY_LIST } from "../lib/categories";
 import {
   VAULT_EXT,
   VAULT_OPEN_EXTS,
@@ -21,7 +20,6 @@ import privacyMarkdown from "../assets/legal/privacy.md?raw";
 interface DraftBeneficiary {
   name: string;
   email: string;
-  access: string[];
 }
 
 const STEPS = [
@@ -83,11 +81,6 @@ export function SetupWizard() {
   const [drafts, setDrafts] = useState<DraftBeneficiary[]>([]);
   const [draftName, setDraftName] = useState("");
   const [draftEmail, setDraftEmail] = useState("");
-  const [draftAccess, setDraftAccess] = useState<string[]>([
-    "documents",
-    "passwords",
-    "personal",
-  ]);
   const [showAddForm, setShowAddForm] = useState(true);
   const [total, setTotal] = useState(3);
   const [required, setRequired] = useState(2);
@@ -110,11 +103,6 @@ export function SetupWizard() {
   const passwordsMatch = password === confirm && password.length > 0;
   const canContinuePassword = passwordsMatch && passwordStrength.score >= 2;
 
-  const toggleDraftAccess = (k: string) =>
-    setDraftAccess((curr) =>
-      curr.includes(k) ? curr.filter((x) => x !== k) : [...curr, k]
-    );
-
   const addDraft = () => {
     if (!draftName.trim()) return;
     setDrafts((d) => [
@@ -122,12 +110,10 @@ export function SetupWizard() {
       {
         name: draftName.trim(),
         email: draftEmail.trim(),
-        access: [...draftAccess],
       },
     ]);
     setDraftName("");
     setDraftEmail("");
-    setDraftAccess(["documents", "passwords", "personal"]);
     setShowAddForm(false);
   };
 
@@ -184,7 +170,7 @@ export function SetupWizard() {
 
       const created: { id: string; name: string; shardIndex: number | null }[] = [];
       for (const d of drafts) {
-        const b = await tauri.addBeneficiary(d.name, d.email, d.access);
+        const b = await tauri.addBeneficiary(d.name, d.email, []);
         created.push({ id: b.id, name: b.name, shardIndex: null });
       }
 
@@ -500,12 +486,7 @@ export function SetupWizard() {
                       <div className="bene-card-main">
                         <div className="bene-card-name">{d.name}</div>
                         <div className="bene-card-meta">
-                          {d.email || "no email"} · intended access:{" "}
-                          {d.access.length === 0
-                            ? "none yet"
-                            : d.access.length >= 5
-                            ? "all categories"
-                            : d.access.join(", ")}
+                          {d.email || "no email"}
                         </div>
                       </div>
                       <button
@@ -554,33 +535,6 @@ export function SetupWizard() {
                       onChange={(e) => setDraftEmail(e.target.value)}
                       spellCheck={false}
                     />
-                  </div>
-                </div>
-                <div className="bene-add-access">
-                  <div className="field-label">Intended access</div>
-                  <div className="access-pills">
-                    {CATEGORY_LIST.map((c) => {
-                      const selected = draftAccess.includes(c.key);
-                      return (
-                        <button
-                          key={c.key}
-                          type="button"
-                          className="access-pill"
-                          onClick={() => toggleDraftAccess(c.key)}
-                          style={{
-                            background: selected ? c.bg : "transparent",
-                            color: selected
-                              ? c.fg
-                              : "var(--color-text-tertiary)",
-                            border: selected
-                              ? "0.5px solid transparent"
-                              : "0.5px dashed var(--color-border-medium)",
-                          }}
-                        >
-                          {c.label}
-                        </button>
-                      );
-                    })}
                   </div>
                 </div>
                 <div className="bene-add-actions">

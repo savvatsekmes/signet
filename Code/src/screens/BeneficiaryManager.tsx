@@ -164,8 +164,8 @@ export function BeneficiaryManager() {
 
         {adding && (
           <AddBeneficiaryForm
-            onAdd={async (n, e, a) => {
-              await add(n, e, a);
+            onAdd={async (n, e) => {
+              await add(n, e);
               await refreshMeta();
             }}
             onCancel={() => setAdding(false)}

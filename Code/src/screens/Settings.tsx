@@ -5,6 +5,7 @@ import { tauri, type UpdateInfo } from "../lib/tauri";
 import { useVaultStore } from "../store/vaultStore";
 import { StrengthMeter, evaluateStrength } from "../components/StrengthMeter";
 import { VAULT_EXT, dateStampedRename } from "../lib/filenames";
+import { getThemeMode, setThemeMode, type ThemeMode } from "../lib/theme";
 
 export function Settings() {
   const {
@@ -23,6 +24,13 @@ export function Settings() {
   const [draftName, setDraftName] = useState(displayName ?? "");
   const [nameBusy, setNameBusy] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
+
+  // Theme
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(getThemeMode());
+  const onChangeTheme = (mode: ThemeMode) => {
+    setThemeMode(mode);
+    setThemeModeState(mode);
+  };
 
   useEffect(() => {
     setDraftName(displayName ?? "");
@@ -237,6 +245,30 @@ export function Settings() {
       </div>
 
       <div className="vb-body">
+        {/* Appearance */}
+        <div className="settings-section">
+          <div className="settings-section-title">Appearance</div>
+          <div className="settings-section-sub">
+            Match your system, or pin Signet to light or dark.
+          </div>
+          <div className="settings-row">
+            <div className="theme-toggle" role="radiogroup" aria-label="Theme">
+              {(["system", "light", "dark"] as ThemeMode[]).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  role="radio"
+                  aria-checked={themeMode === m}
+                  className={`theme-toggle-option${themeMode === m ? " is-active" : ""}`}
+                  onClick={() => onChangeTheme(m)}
+                >
+                  {m === "system" ? "System" : m === "light" ? "Light" : "Dark"}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Display name */}
         <div className="settings-section">
           <div className="settings-section-title">Display name</div>

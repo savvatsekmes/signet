@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Signet</title>
+    <script>
+      // Resolve theme before paint to avoid a light→dark flash on launch.
+      (function () {
+        var raw = null;
+        try { raw = localStorage.getItem("signet.theme"); } catch (_) {}
+        var mode = raw === "light" || raw === "dark" ? raw : "system";
+        var dark = mode === "dark" ||
+          (mode === "system" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

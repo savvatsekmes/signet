@@ -123,7 +123,14 @@ export function VaultPanel({ view }: Props) {
     setOpError(null);
     setBusy(true);
     try {
-      await addFromPath(path, categoryFor(path));
+      if (await tauri.isDirectory(path)) {
+        const inside = await tauri.listFilesRecursively(path);
+        for (const f of inside) {
+          await addFromPath(f, categoryFor(f));
+        }
+      } else {
+        await addFromPath(path, categoryFor(path));
+      }
     } catch (err) {
       setOpError(typeof err === "string" ? err : "Failed to add file");
     } finally {

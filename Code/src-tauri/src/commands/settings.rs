@@ -1,3 +1,4 @@
+use crate::commands::paths;
 use crate::state::AppState;
 use crate::vault::format;
 use std::fs;
@@ -6,12 +7,7 @@ use tauri::State;
 use zeroize::Zeroize;
 
 fn config_dir() -> Result<std::path::PathBuf, String> {
-    let exe = std::env::current_exe()
-        .map_err(|e| format!("Cannot resolve executable path: {}", e))?;
-    Ok(exe
-        .parent()
-        .ok_or("Executable has no parent directory")?
-        .to_path_buf())
+    paths::config_dir()
 }
 
 #[tauri::command]

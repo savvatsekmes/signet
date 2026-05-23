@@ -1,3 +1,4 @@
+use crate::commands::paths;
 use crate::state::AppState;
 use crate::vault::{format, manifest::VaultMeta};
 use tauri::State;
@@ -51,23 +52,11 @@ pub async fn vault_exists(path: String) -> Result<bool, String> {
 
 #[tauri::command]
 pub async fn default_vault_path() -> Result<String, String> {
-    let exe = std::env::current_exe()
-        .map_err(|e| format!("Cannot resolve executable path: {}", e))?;
-    let dir = exe
-        .parent()
-        .ok_or("Executable has no parent directory")?
-        .to_path_buf();
-    let vault = dir.join("vault.signet");
-    Ok(vault.to_string_lossy().into_owned())
+    Ok(paths::default_vault_path()?.to_string_lossy().into_owned())
 }
 
 fn config_dir() -> Result<std::path::PathBuf, String> {
-    let exe = std::env::current_exe()
-        .map_err(|e| format!("Cannot resolve executable path: {}", e))?;
-    Ok(exe
-        .parent()
-        .ok_or("Executable has no parent directory")?
-        .to_path_buf())
+    paths::config_dir()
 }
 
 #[tauri::command]

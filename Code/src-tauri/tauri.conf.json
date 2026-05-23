@@ -28,7 +28,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis"],
+    "targets": "all",
     "publisher": "Signet",
     "category": "Utility",
     "shortDescription": "Local encrypted vault for the people you leave behind.",
@@ -47,6 +47,14 @@
         "installMode": "perMachine",
         "languages": ["English"],
         "displayLanguageSelector": false
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "10.15",
+      "dmg": {
+        "appPosition": { "x": 180, "y": 220 },
+        "applicationFolderPosition": { "x": 480, "y": 220 },
+        "windowSize": { "width": 660, "height": 420 }
       }
     }
   }

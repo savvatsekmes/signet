@@ -3,6 +3,7 @@ pub mod documents;
 pub mod export;
 pub mod files;
 pub mod passwords;
+pub mod paths;
 pub mod seeds;
 pub mod settings;
 pub mod shamir;

@@ -37,8 +37,7 @@ export function VaultPanel({ view }: Props) {
 
   const [busy, setBusy] = useState(false);
   const [opError, setOpError] = useState<string | null>(null);
-  const [pickerCategory, setPickerCategory] =
-    useState<CategoryKey>("documents");
+  const [pickerCategory] = useState<CategoryKey>("documents");
   const [docs, setDocs] = useState<DocumentMeta[]>([]);
 
   useEffect(() => {
@@ -245,20 +244,6 @@ export function VaultPanel({ view }: Props) {
           </div>
         </div>
         <div className="vb-actions">
-          {view === "all" && (
-            <select
-              className="cat-picker"
-              value={pickerCategory}
-              onChange={(e) => setPickerCategory(e.target.value as CategoryKey)}
-              title="Default category when file extension can't be inferred"
-            >
-              {CATEGORY_LIST.map((c) => (
-                <option key={c.key} value={c.key}>
-                  Fallback: {c.label}
-                </option>
-              ))}
-            </select>
-          )}
           <button
             type="button"
             className="btn-secondary"

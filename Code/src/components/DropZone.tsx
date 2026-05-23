@@ -59,7 +59,7 @@ export function DropZone({ onDrop, busy }: Props) {
     <div className={cls}>
       {busy
         ? "Encrypting and adding to vault…"
-        : "Drop any file here to encrypt and add to vault"}
+        : "Drop a file or folder here to encrypt and add to vault"}
     </div>
   );
 }

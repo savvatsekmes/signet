@@ -121,7 +121,12 @@ export function SeedsPanel() {
     setError(null);
     setBusy(true);
     try {
-      await addFromPath(path, "crypto");
+      if (await tauri.isDirectory(path)) {
+        const inside = await tauri.listFilesRecursively(path);
+        for (const f of inside) await addFromPath(f, "crypto");
+      } else {
+        await addFromPath(path, "crypto");
+      }
     } catch (err) {
       setError(typeof err === "string" ? err : "Failed to add file");
     } finally {

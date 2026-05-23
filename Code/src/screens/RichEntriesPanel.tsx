@@ -22,6 +22,7 @@ import {
 } from "../lib/preview";
 import { categoryFor, type CategoryKey } from "../lib/categories";
 import { CATEGORY_ICONS } from "../lib/icons";
+import { basename } from "../lib/filenames";
 
 type ListItem =
   | {
@@ -395,7 +396,19 @@ export function RichEntriesPanel({
     setError(null);
     setBusy(true);
     try {
-      await addFromPath(path, fileCategory, tagForNewItems());
+      if (await tauri.isDirectory(path)) {
+        const folder = basename(path) || "Imported";
+        const inside = await tauri.listFilesRecursively(path);
+        for (const f of inside) {
+          await addFromPath(f, fileCategory, folder);
+        }
+        setExtraTags((prev) =>
+          prev.includes(folder) ? prev : [...prev, folder]
+        );
+        setActiveTag(folder);
+      } else {
+        await addFromPath(path, fileCategory, tagForNewItems());
+      }
     } catch (err) {
       setError(typeof err === "string" ? err : "Failed to add file");
     } finally {
@@ -537,7 +550,7 @@ export function RichEntriesPanel({
             "doc-section-tab" + (activeTag === "Main" ? " active" : "")
           }
           onClick={() => setActiveTag("Main")}
-          title="Items in the Main tag (default)"
+          title="Items in the Main folder (default)"
         >
           Main
         </button>
@@ -558,7 +571,7 @@ export function RichEntriesPanel({
           className="doc-section-tab doc-section-add"
           onClick={() => {
             const name = window.prompt(
-              "New tag name (e.g. House things, Letters, Finances):"
+              "New folder name (e.g. House things, Letters, Finances):"
             );
             if (!name) return;
             const trimmed = name.trim();
@@ -568,9 +581,9 @@ export function RichEntriesPanel({
             );
             setActiveTag(trimmed);
           }}
-          title="Create a new tag"
+          title="Create a new folder"
         >
-          + Tag
+          + Folder
         </button>
       </div>
 

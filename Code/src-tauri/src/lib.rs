@@ -8,8 +8,9 @@ use commands::beneficiaries::{
 };
 use commands::export::export_recovery_pdf;
 use commands::files::{
-    add_file, delete_file, export_all_files, get_file, get_file_data, list_files,
-    save_file_to_disk, set_file_section, update_file_data,
+    add_file, delete_file, export_all_files, get_file, get_file_data, is_directory,
+    list_files, list_files_recursively, save_file_to_disk, set_file_section,
+    update_file_data,
 };
 use commands::documents::{
     add_document, delete_document, export_document, export_document_html, get_document,
@@ -65,6 +66,8 @@ pub fn run() {
             delete_file,
             save_file_to_disk,
             export_all_files,
+            is_directory,
+            list_files_recursively,
             add_password,
             update_password,
             delete_password,

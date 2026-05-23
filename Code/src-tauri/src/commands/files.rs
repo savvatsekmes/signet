@@ -77,6 +77,47 @@ pub async fn add_file(
 }
 
 #[tauri::command]
+pub fn is_directory(path: String) -> bool {
+    std::fs::metadata(&path).map(|m| m.is_dir()).unwrap_or(false)
+}
+
+/// Walk a directory and return every regular file beneath it. Hidden entries
+/// (name starting with '.') are skipped — that keeps macOS .DS_Store and
+/// editor temp files out of the vault when a user drops a folder.
+#[tauri::command]
+pub fn list_files_recursively(path: String) -> Result<Vec<String>, String> {
+    fn walk(dir: &Path, out: &mut Vec<String>) -> std::io::Result<()> {
+        for entry in std::fs::read_dir(dir)? {
+            let entry = entry?;
+            let name = entry.file_name();
+            if name.to_string_lossy().starts_with('.') {
+                continue;
+            }
+            let p = entry.path();
+            let ft = entry.file_type()?;
+            if ft.is_dir() {
+                walk(&p, out)?;
+            } else if ft.is_file() {
+                if let Some(s) = p.to_str() {
+                    out.push(s.to_string());
+                }
+            }
+            // Symlinks are skipped intentionally — encrypting a link's target
+            // without telling the user is surprising.
+        }
+        Ok(())
+    }
+
+    let p = Path::new(&path);
+    if !p.is_dir() {
+        return Err("Not a directory".to_string());
+    }
+    let mut out = Vec::new();
+    walk(p, &mut out).map_err(|e| format!("Failed to read folder: {}", e))?;
+    Ok(out)
+}
+
+#[tauri::command]
 pub async fn list_files(
     category: Option<String>,
     state: State<'_, AppState>,

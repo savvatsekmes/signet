@@ -155,6 +155,9 @@ export const tauri = {
       skipped: number;
       root: string;
     }>("export_all_files", { outputDir }),
+  isDirectory: (path: string) => invoke<boolean>("is_directory", { path }),
+  listFilesRecursively: (path: string) =>
+    invoke<string[]>("list_files_recursively", { path }),
 
   // Passwords
   addPassword: (input: PasswordInput) =>

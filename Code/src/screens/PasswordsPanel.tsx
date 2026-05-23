@@ -121,7 +121,12 @@ export function PasswordsPanel() {
     setError(null);
     setBusy(true);
     try {
-      await addFromPath(path, "passwords");
+      if (await tauri.isDirectory(path)) {
+        const inside = await tauri.listFilesRecursively(path);
+        for (const f of inside) await addFromPath(f, "passwords");
+      } else {
+        await addFromPath(path, "passwords");
+      }
     } catch (err) {
       setError(typeof err === "string" ? err : "Failed to add file");
     } finally {

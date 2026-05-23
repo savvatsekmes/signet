@@ -21,6 +21,13 @@ export function suggestedVaultFilename(displayName?: string | null): string {
   return `${base}_vault_${date}.${VAULT_EXT}`;
 }
 
+/** Cross-platform basename — works for both Windows backslashes and POSIX slashes. */
+export function basename(path: string): string {
+  const trimmed = path.replace(/[\\/]+$/, "");
+  const idx = Math.max(trimmed.lastIndexOf("\\"), trimmed.lastIndexOf("/"));
+  return idx >= 0 ? trimmed.slice(idx + 1) : trimmed;
+}
+
 /** Build a fresh date-stamped name based on an existing path's basename. */
 export function dateStampedRename(currentPath: string): string {
   const idx = Math.max(currentPath.lastIndexOf("\\"), currentPath.lastIndexOf("/"));

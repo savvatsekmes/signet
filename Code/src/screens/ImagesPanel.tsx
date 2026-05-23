@@ -10,6 +10,7 @@ import { DropZone } from "../components/DropZone";
 import { PreviewModal } from "../components/PreviewModal";
 import { Combobox } from "../components/Combobox";
 import { previewKindFor, type PreviewKind } from "../lib/preview";
+import { basename } from "../lib/filenames";
 
 export function ImagesPanel() {
   const { files } = useVaultStore();
@@ -102,7 +103,19 @@ export function ImagesPanel() {
     setError(null);
     setBusy(true);
     try {
-      await addFromPath(path, "images", tagForNewItems());
+      if (await tauri.isDirectory(path)) {
+        const folder = basename(path) || "Imported";
+        const inside = await tauri.listFilesRecursively(path);
+        for (const f of inside) {
+          await addFromPath(f, "images", folder);
+        }
+        setExtraTags((prev) =>
+          prev.includes(folder) ? prev : [...prev, folder]
+        );
+        setActiveTag(folder);
+      } else {
+        await addFromPath(path, "images", tagForNewItems());
+      }
     } catch (err) {
       setError(typeof err === "string" ? err : "Failed to add image");
     } finally {
@@ -259,7 +272,7 @@ export function ImagesPanel() {
           className="doc-section-tab doc-section-add"
           onClick={() => {
             const name = window.prompt(
-              "New tag name (e.g. Holidays, Family, ID photos):"
+              "New folder name (e.g. Holidays, Family, ID photos):"
             );
             if (!name) return;
             const trimmed = name.trim();
@@ -270,7 +283,7 @@ export function ImagesPanel() {
             setActiveTag(trimmed);
           }}
         >
-          + Tag
+          + Folder
         </button>
       </div>
 
@@ -304,9 +317,9 @@ export function ImagesPanel() {
                       type="button"
                       className="action-btn"
                       onClick={() => onMoveTag(f)}
-                      title="Change tag"
+                      title="Change folder"
                     >
-                      Tag
+                      Folder
                     </button>
                     <button
                       type="button"
@@ -364,12 +377,12 @@ export function ImagesPanel() {
           >
             <div className="preview-modal-header">
               <div className="preview-modal-title">
-                <div className="preview-modal-name">Move to tag</div>
+                <div className="preview-modal-name">Move to folder</div>
                 <div className="preview-modal-meta">{tagging.file.name}</div>
               </div>
             </div>
             <div className="pw-form-body">
-              <label className="field-label">Tag</label>
+              <label className="field-label">Folder</label>
               <Combobox
                 value={tagging.value}
                 options={["Main", ...tags.filter((t) => t.toLowerCase() !== "main")]}

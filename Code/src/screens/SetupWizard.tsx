@@ -233,6 +233,7 @@ export function SetupWizard() {
       if (!target || typeof target !== "string") return;
       setPrintingId(b.id);
       await tauri.exportRecoveryPdf(b.id, target);
+      await tauri.updateBeneficiary(b.id, { cardPrinted: true });
       try {
         await openExternal(target);
       } catch {

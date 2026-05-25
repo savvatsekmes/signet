@@ -44,6 +44,28 @@ Then double-click as normal.
 
 Your `vault.signet` file is the only file that contains your secrets. Back it up the same way you'd back up any important document. You can move it anywhere on disk — Signet remembers the last opened location.
 
+## Using a YubiKey (optional)
+
+Signet 1.0.1 ships with optional hardware-key 2FA — turn it on in **Settings → Hardware key** and your master password becomes "password + tap of YubiKey" for every unlock.
+
+The underlying implementation (`ctap-hid-fido2`) talks directly to the FIDO HID device, which on macOS requires **Input Monitoring** permission. macOS doesn't always prompt for it automatically, so if Signet says **"No security key detected"** while a YubiKey is plugged in:
+
+1. Open **System Settings → Privacy & Security → Input Monitoring**
+2. If Signet isn't listed, drag `/Applications/Signet.app` into the list
+3. Toggle Signet **on**
+4. **Fully quit Signet** (Cmd-Q — not just closing the window) and reopen it
+5. Try **Enable YubiKey** again
+
+If the device still isn't found, confirm macOS sees the YubiKey at all:
+
+```sh
+ioreg -p IOUSB -l -w 0 | grep -A2 -i yubikey
+```
+
+If nothing appears there, the issue is hardware/cable/driver-level, not Signet.
+
+A future release will move to the OS-native WebAuthn API (`AuthenticationServices.framework`), at which point this permission step won't be needed.
+
 ## Uninstall
 
 1. Quit Signet.
@@ -64,4 +86,4 @@ Compare against the hash published on the release page.
 ## Known limitations
 
 - **No code signing or notarization.** Until Signet has a paid Apple Developer ID, every release will trigger the Gatekeeper warning above. The app is otherwise fully functional.
-- **YubiKey support is not yet implemented** on macOS or Windows. The vault format reserves space for it; the UI is wired up; the actual FIDO2 integration is a planned later release.
+- **YubiKey 2FA requires a one-time Input Monitoring grant** (see [Using a YubiKey](#using-a-yubikey-optional)). A future release will switch to the OS WebAuthn API so the permission step goes away.

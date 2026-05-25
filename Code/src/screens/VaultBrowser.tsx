@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { tauri } from "../lib/tauri";
 import { useVaultStore } from "../store/vaultStore";
 import { useFiles } from "../hooks/useFiles";
 import { useBeneficiaries } from "../hooks/useBeneficiaries";
@@ -20,8 +21,16 @@ import { PersonalPanel } from "./PersonalPanel";
 import { ImagesPanel } from "./ImagesPanel";
 
 export function VaultBrowser() {
-  const { files, beneficiaries, meta, browserView, setBrowserView } =
+  const { files, beneficiaries, meta, browserView, setBrowserView, reset } =
     useVaultStore();
+
+  const onLock = async () => {
+    try {
+      await tauri.lockVault();
+    } finally {
+      reset();
+    }
+  };
   // Mount the hooks at the shell level so the data is loaded once and shared.
   useFiles();
   useBeneficiaries();
@@ -74,6 +83,7 @@ export function VaultBrowser() {
         suggestionsRemaining={remaining}
         completenessSlices={slices}
         onSelectView={setBrowserView}
+        onLock={onLock}
       />
 
       <div className="vb-main">

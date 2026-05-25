@@ -629,6 +629,36 @@ input:focus {
   padding: 10px;
 }
 
+.sb-lock-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  background: var(--color-bg-tertiary);
+  border: 0.5px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms;
+}
+
+.sb-lock-btn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-dark, var(--color-border-medium));
+}
+
+.sb-lock-icon-img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  opacity: 0.85;
+}
+
 .health {
   background: var(--color-bg-primary);
   border: 0.5px solid var(--color-border-light);

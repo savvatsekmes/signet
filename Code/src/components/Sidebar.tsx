@@ -13,6 +13,7 @@ interface Props {
   suggestionsRemaining: number;
   completenessSlices?: CompletenessSlice[];
   onSelectView: (view: BrowserView) => void;
+  onLock: () => void;
 }
 
 export function Sidebar({
@@ -24,6 +25,7 @@ export function Sidebar({
   suggestionsRemaining,
   completenessSlices,
   onSelectView,
+  onLock,
 }: Props) {
   return (
     <div className="sidebar">
@@ -72,6 +74,15 @@ export function Sidebar({
       </div>
 
       <div className="sb-footer">
+        <button
+          type="button"
+          className="sb-lock-btn"
+          onClick={onLock}
+          title="Lock vault and return to the password screen"
+        >
+          <img src={ICONS.myvault} alt="" className="sb-lock-icon-img" />
+          <span>Lock vault</span>
+        </button>
         <CompletionBar
           score={score}
           remaining={suggestionsRemaining}

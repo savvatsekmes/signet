@@ -48,23 +48,31 @@ Your `vault.signet` file is the only file that contains your secrets. Back it up
 
 Signet 1.0.1 ships with optional hardware-key 2FA — turn it on in **Settings → Hardware key** and your master password becomes "password + tap of YubiKey" for every unlock.
 
-The underlying implementation (`ctap-hid-fido2`) talks directly to the FIDO HID device, which on macOS requires **Input Monitoring** permission. macOS doesn't always prompt for it automatically, so if Signet says **"No security key detected"** while a YubiKey is plugged in:
+### Apple Silicon (M1/M2/M3/M4): allow USB-C accessories
 
-1. Open **System Settings → Privacy & Security → Input Monitoring**
-2. If Signet isn't listed, drag `/Applications/Signet.app` into the list
-3. Toggle Signet **on**
-4. **Fully quit Signet** (Cmd-Q — not just closing the window) and reopen it
-5. Try **Enable YubiKey** again
+On Apple Silicon Macs, macOS gates every USB-C device behind an "Allow accessory to connect?" prompt. If you miss the prompt (it can auto-dismiss quickly), the YubiKey will appear unplugged to every app on the system, and Signet will say **"No security key detected."**
 
-If the device still isn't found, confirm macOS sees the YubiKey at all:
+The fix is one setting:
+
+1. Open **System Settings → Privacy & Security**
+2. Scroll to **Allow accessories to connect**
+3. Set it to **Always**
+4. Unplug and replug the YubiKey
+5. Try **Enable YubiKey** in Signet again
+
+If you'd rather keep the prompt for security, leave it on "Ask for New Accessories" — just be ready to click **Allow** the moment the popup appears. Once you approve the YubiKey once, macOS remembers it forever.
+
+### Still not detected?
+
+Confirm macOS sees the YubiKey HID interface:
 
 ```sh
-ioreg -p IOUSB -l -w 0 | grep -A2 -i yubikey
+hidutil list | grep -i yubi
 ```
 
-If nothing appears there, the issue is hardware/cable/driver-level, not Signet.
+If nothing comes back, the device hasn't been authorized at the USB level yet — re-check the "Allow accessories" setting. If that returns a Yubico device but Signet still can't see it, plug the key directly into the Mac (skip any hubs or USB-A → USB-C adapters), then try again.
 
-A future release will move to the OS-native WebAuthn API (`AuthenticationServices.framework`), at which point this permission step won't be needed.
+A future release will move to the OS-native WebAuthn API (`AuthenticationServices.framework`), at which point Signet can route through Touch ID / passkeys and the USB-C authorization step won't matter.
 
 ## Uninstall
 
@@ -86,4 +94,4 @@ Compare against the hash published on the release page.
 ## Known limitations
 
 - **No code signing or notarization.** Until Signet has a paid Apple Developer ID, every release will trigger the Gatekeeper warning above. The app is otherwise fully functional.
-- **YubiKey 2FA requires a one-time Input Monitoring grant** (see [Using a YubiKey](#using-a-yubikey-optional)). A future release will switch to the OS WebAuthn API so the permission step goes away.
+- **YubiKey 2FA needs USB-C accessories to be allowed** on Apple Silicon (see [Using a YubiKey](#using-a-yubikey-optional)). A future release will switch to the OS WebAuthn API so the USB-C authorization step won't matter.

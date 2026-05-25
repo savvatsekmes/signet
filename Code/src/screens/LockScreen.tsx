@@ -243,9 +243,11 @@ export function LockScreen() {
               <>
                 <br />
                 <br />
-                <strong>macOS tip:</strong> if the key isn't detected, open
-                System Settings → Privacy &amp; Security → Input Monitoring
-                and toggle Signet on. Then fully quit (⌘Q) and reopen.
+                <strong>macOS tip:</strong> if the key isn't detected on
+                Apple Silicon, open System Settings → Privacy &amp;
+                Security → <em>Allow accessories to connect</em> and set
+                it to <strong>Always</strong>. Then unplug and replug
+                the YubiKey.
               </>
             )}
           </div>

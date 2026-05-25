@@ -506,10 +506,11 @@ export function Settings() {
               <>
                 <br />
                 <br />
-                <strong>macOS note:</strong> the first time you use a
-                YubiKey, macOS will need permission. Open System Settings →
-                Privacy &amp; Security → Input Monitoring and toggle Signet
-                on, then fully quit (⌘Q) and reopen.
+                <strong>macOS note:</strong> on Apple Silicon, USB-C
+                devices need to be authorized once. Open System Settings →
+                Privacy &amp; Security → <em>Allow accessories to
+                connect</em> and set it to <strong>Always</strong>, then
+                replug the YubiKey.
               </>
             )}
           </div>

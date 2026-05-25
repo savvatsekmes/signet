@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
+import { platform } from "@tauri-apps/plugin-os";
 import { tauri, type LockoutInfo } from "../lib/tauri";
 import { useVaultStore } from "../store/vaultStore";
 import { VAULT_OPEN_EXTS } from "../lib/filenames";
@@ -60,6 +61,15 @@ export function LockScreen() {
   const [loading, setLoading] = useState(false);
   const [lockout, setLockout] = useState<LockoutInfo | null>(null);
   const [requiresYubikey, setRequiresYubikey] = useState(false);
+  const [os, setOs] = useState<string>("");
+
+  useEffect(() => {
+    try {
+      setOs(platform());
+    } catch {
+      /* not running in tauri / not available */
+    }
+  }, []);
   const { vaultPath, displayName, setMeta, setRoute, setVaultPath, setDisplayName } =
     useVaultStore();
 
@@ -217,6 +227,27 @@ export function LockScreen() {
           <div className="yubikey-required-banner">
             <strong>YubiKey required.</strong> Plug in your hardware key
             before unlocking — you'll be asked to tap it after the password.
+            {os === "windows" && (
+              <>
+                <br />
+                <br />
+                <strong>Windows tip:</strong> if the key isn't detected,
+                close Signet and re-open by right-clicking{" "}
+                <span className="mono">
+                  Signet.exe → Run as administrator
+                </span>
+                .
+              </>
+            )}
+            {os === "macos" && (
+              <>
+                <br />
+                <br />
+                <strong>macOS tip:</strong> if the key isn't detected, open
+                System Settings → Privacy &amp; Security → Input Monitoring
+                and toggle Signet on. Then fully quit (⌘Q) and reopen.
+              </>
+            )}
           </div>
         )}
 

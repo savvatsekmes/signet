@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { save as saveDialog } from "@tauri-apps/plugin-dialog";
 import { open as openExternal } from "@tauri-apps/plugin-shell";
+import { platform } from "@tauri-apps/plugin-os";
 import { tauri, type UpdateInfo } from "../lib/tauri";
 import { useVaultStore } from "../store/vaultStore";
 import { StrengthMeter, evaluateStrength } from "../components/StrengthMeter";
@@ -165,6 +166,16 @@ export function Settings() {
       setUpdateChecking(false);
     }
   };
+
+  // OS detection — show platform-specific access instructions for the YubiKey
+  const [os, setOs] = useState<string>("");
+  useEffect(() => {
+    try {
+      setOs(platform());
+    } catch {
+      /* not running in tauri / not available */
+    }
+  }, []);
 
   // Hardware key (YubiKey / FIDO2)
   const [ykEnabled, setYkEnabled] = useState<boolean | null>(null);
@@ -478,6 +489,29 @@ export function Settings() {
             <strong>Recovery still works:</strong> if you lose your YubiKey,
             beneficiaries can reconstruct the vault via Shamir cards as
             before.
+            {os === "windows" && (
+              <>
+                <br />
+                <br />
+                <strong>Windows note:</strong> Signet currently needs to be
+                run as Administrator to talk to FIDO security keys
+                (right-click{" "}
+                <span className="mono">
+                  Signet.exe → Run as administrator
+                </span>
+                ). We're working on removing this requirement.
+              </>
+            )}
+            {os === "macos" && (
+              <>
+                <br />
+                <br />
+                <strong>macOS note:</strong> the first time you use a
+                YubiKey, macOS will need permission. Open System Settings →
+                Privacy &amp; Security → Input Monitoring and toggle Signet
+                on, then fully quit (⌘Q) and reopen.
+              </>
+            )}
           </div>
 
           {ykEnabled === null ? (

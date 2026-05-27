@@ -14,6 +14,7 @@ fn config_dir() -> Result<std::path::PathBuf, String> {
 pub async fn change_master_password(
     old_password: String,
     new_password: String,
+    yubikey_pin: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
     let path = state
@@ -22,7 +23,12 @@ pub async fn change_master_password(
         .map_err(|_| "State lock poisoned")?
         .clone()
         .ok_or("Vault is not unlocked")?;
-    let new_key = format::change_master_password(&path, &old_password, &new_password)?;
+    let new_key = format::change_master_password(
+        &path,
+        &old_password,
+        &new_password,
+        yubikey_pin.as_deref(),
+    )?;
     {
         let mut k = state.key.lock().map_err(|_| "State lock poisoned")?;
         if let Some(ref mut existing) = *k {

@@ -111,8 +111,12 @@ export const tauri = {
       path,
       displayName: displayName ?? null,
     }),
-  unlockVault: (password: string, path: string) =>
-    invoke<VaultMeta>("unlock_vault", { password, path }),
+  unlockVault: (password: string, path: string, yubikeyPin?: string | null) =>
+    invoke<VaultMeta>("unlock_vault", {
+      password,
+      path,
+      yubikeyPin: yubikeyPin ?? null,
+    }),
   lockVault: () => invoke<void>("lock_vault"),
   vaultExists: (path: string) => invoke<boolean>("vault_exists", { path }),
   defaultVaultPath: () => invoke<string>("default_vault_path"),
@@ -256,8 +260,16 @@ export const tauri = {
     invoke<void>("export_recovery_pdf", { beneficiaryId, outputPath }),
 
   // Settings
-  changeMasterPassword: (oldPassword: string, newPassword: string) =>
-    invoke<void>("change_master_password", { oldPassword, newPassword }),
+  changeMasterPassword: (
+    oldPassword: string,
+    newPassword: string,
+    yubikeyPin?: string | null
+  ) =>
+    invoke<void>("change_master_password", {
+      oldPassword,
+      newPassword,
+      yubikeyPin: yubikeyPin ?? null,
+    }),
   changeVaultLocation: (newPath: string) =>
     invoke<void>("change_vault_location", { newPath }),
   showInFileExplorer: (path: string) =>
@@ -268,10 +280,11 @@ export const tauri = {
   vaultHasYubikey: (path: string) =>
     invoke<boolean>("vault_has_yubikey", { path }),
   yubikeyIsPresent: () => invoke<boolean>("yubikey_is_present"),
-  yubikeyEnable: (password: string) =>
-    invoke<void>("yubikey_enable", { password }),
-  yubikeyDisable: (password: string) =>
-    invoke<void>("yubikey_disable", { password }),
+  yubikeyRequiresPin: () => invoke<boolean>("yubikey_requires_pin"),
+  yubikeyEnable: (password: string, pin?: string | null) =>
+    invoke<void>("yubikey_enable", { password, pin: pin ?? null }),
+  yubikeyDisable: (password: string, pin?: string | null) =>
+    invoke<void>("yubikey_disable", { password, pin: pin ?? null }),
 
   // Updates
   getAppVersion: () => invoke<string>("get_app_version"),

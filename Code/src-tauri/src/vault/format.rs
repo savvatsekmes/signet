@@ -232,7 +232,11 @@ pub fn create_vault(path: &str, password: &str) -> Result<(), String> {
     Ok(())
 }
 
-pub fn unlock_vault(path: &str, password: &str) -> Result<(VaultManifest, [u8; 32]), String> {
+pub fn unlock_vault(
+    path: &str,
+    password: &str,
+    yubikey_pin: Option<&str>,
+) -> Result<(VaultManifest, [u8; 32]), String> {
     // Refuse early if the vault is currently locked out.
     let state = read_lockout(path)?;
     if state.is_locked() {
@@ -256,7 +260,7 @@ pub fn unlock_vault(path: &str, password: &str) -> Result<(VaultManifest, [u8; 3
     // hmac-secret output into Argon2id alongside the password.
     let (yubikey_secret, ciphertext_start) = match parse_yubikey_block(&data)? {
         Some(block) => {
-            let secret = yubikey::assert(&block.credential_id, &block.salt)?;
+            let secret = yubikey::assert(&block.credential_id, &block.salt, yubikey_pin)?;
             (Some(secret), block.ciphertext_start)
         }
         None => (None, HEADER_SIZE),
@@ -367,6 +371,7 @@ pub fn change_master_password(
     path: &str,
     old_password: &str,
     new_password: &str,
+    yubikey_pin: Option<&str>,
 ) -> Result<[u8; 32], String> {
     if new_password.is_empty() {
         return Err("New password cannot be empty".to_string());
@@ -385,7 +390,7 @@ pub fn change_master_password(
     // ID so the user does not need to re-enrol after a password change.
     let yubikey_block = parse_yubikey_block(&data)?;
     let yubikey_secret = if let Some(block) = yubikey_block.as_ref() {
-        Some(yubikey::assert(&block.credential_id, &block.salt)?)
+        Some(yubikey::assert(&block.credential_id, &block.salt, yubikey_pin)?)
     } else {
         None
     };
@@ -491,7 +496,11 @@ pub fn enable_yubikey(
 /// Remove the YubiKey requirement. Requires the current password AND a touch
 /// of the still-enrolled YubiKey to authorise the change. Returns the new
 /// (password-only) master key.
-pub fn disable_yubikey(path: &str, password: &str) -> Result<[u8; 32], String> {
+pub fn disable_yubikey(
+    path: &str,
+    password: &str,
+    yubikey_pin: Option<&str>,
+) -> Result<[u8; 32], String> {
     let data = fs::read(path).map_err(|_| "Vault file not found or unreadable")?;
     if data.len() < HEADER_SIZE {
         return Err("File is too small to be a valid Signet vault".to_string());
@@ -502,7 +511,7 @@ pub fn disable_yubikey(path: &str, password: &str) -> Result<[u8; 32], String> {
     let block = parse_yubikey_block(&data)?
         .ok_or("This vault does not have a YubiKey enrolled.")?;
 
-    let yubi_secret = yubikey::assert(&block.credential_id, &block.salt)?;
+    let yubi_secret = yubikey::assert(&block.credential_id, &block.salt, yubikey_pin)?;
 
     // Verify password+yubikey by decrypting.
     let salt_bytes = &data[SALT_OFFSET..SALT_OFFSET + SALT_BYTES];

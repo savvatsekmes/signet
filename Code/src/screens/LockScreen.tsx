@@ -61,6 +61,8 @@ export function LockScreen() {
   const [loading, setLoading] = useState(false);
   const [lockout, setLockout] = useState<LockoutInfo | null>(null);
   const [requiresYubikey, setRequiresYubikey] = useState(false);
+  const [yubikeyPin, setYubikeyPin] = useState("");
+  const [yubikeyPinNeeded, setYubikeyPinNeeded] = useState(false);
   const [os, setOs] = useState<string>("");
 
   useEffect(() => {
@@ -114,19 +116,31 @@ export function LockScreen() {
     e.preventDefault();
     if (!password || !vaultPath || loading) return;
     if (lockout?.locked) return;
+    if (yubikeyPinNeeded && !yubikeyPin) return;
     setLoading(true);
     setError(null);
     try {
-      const meta = await tauri.unlockVault(password, vaultPath);
+      const meta = await tauri.unlockVault(
+        password,
+        vaultPath,
+        yubikeyPinNeeded ? yubikeyPin : null
+      );
       setMeta(meta);
       // Remember the path that just successfully unlocked.
       tauri.setLastVaultPath(vaultPath).catch(() => undefined);
       setPassword("");
+      setYubikeyPin("");
+      setYubikeyPinNeeded(false);
       setRoute("browser");
     } catch (err) {
       const msg = typeof err === "string" ? err : "Incorrect password";
       const lower = msg.toLowerCase();
-      if (lower.startsWith("vault is locked")) {
+      // Backend signals "the YubiKey wants a PIN" with this sentinel —
+      // re-show the form with a PIN field added; keep the password.
+      if (msg === "YUBIKEY_PIN_REQUIRED") {
+        setYubikeyPinNeeded(true);
+        setError(null);
+      } else if (lower.startsWith("vault is locked")) {
         // Backend just refused because we're now locked. Refresh state.
         setError(msg);
       } else {
@@ -282,10 +296,48 @@ export function LockScreen() {
           </button>
         </div>
 
+        {yubikeyPinNeeded && (
+          <>
+            <label
+              className="field-label"
+              htmlFor="yubikey-pin"
+              style={{ marginTop: 10 }}
+            >
+              YubiKey PIN
+            </label>
+            <input
+              id="yubikey-pin"
+              className="password-input"
+              type="password"
+              value={yubikeyPin}
+              onChange={(e) => {
+                setYubikeyPin(e.target.value);
+                if (error) setError(null);
+              }}
+              autoFocus
+              autoComplete="off"
+              spellCheck={false}
+              disabled={lockout?.locked}
+            />
+            <div
+              className="yubikey-required-banner"
+              style={{ marginTop: 6 }}
+            >
+              Your YubiKey has a PIN configured. 8 wrong PIN attempts in
+              total will permanently lock the FIDO2 applet on the key.
+            </div>
+          </>
+        )}
+
         <button
           type="submit"
           className="unlock-btn"
-          disabled={!password || loading || lockout?.locked}
+          disabled={
+            !password ||
+            loading ||
+            lockout?.locked ||
+            (yubikeyPinNeeded && !yubikeyPin)
+          }
         >
           {loading ? (
             <>

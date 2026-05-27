@@ -183,6 +183,8 @@ export function Settings() {
   const [ykBusy, setYkBusy] = useState(false);
   const [ykError, setYkError] = useState<string | null>(null);
   const [ykPassword, setYkPassword] = useState("");
+  const [ykPin, setYkPin] = useState("");
+  const [ykPinNeeded, setYkPinNeeded] = useState(false);
   const [ykMode, setYkMode] = useState<"idle" | "enable" | "disable">("idle");
 
   useEffect(() => {
@@ -204,20 +206,33 @@ export function Settings() {
   const onSubmitYk = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!ykPassword) return;
+    if (ykPinNeeded && !ykPin) return;
     setYkError(null);
     setYkBusy(true);
     try {
+      const pin = ykPinNeeded ? ykPin : null;
       if (ykMode === "enable") {
-        await tauri.yubikeyEnable(ykPassword);
+        await tauri.yubikeyEnable(ykPassword, pin);
         setYkEnabled(true);
       } else if (ykMode === "disable") {
-        await tauri.yubikeyDisable(ykPassword);
+        await tauri.yubikeyDisable(ykPassword, pin);
         setYkEnabled(false);
       }
       setYkPassword("");
+      setYkPin("");
+      setYkPinNeeded(false);
       setYkMode("idle");
     } catch (err) {
-      setYkError(typeof err === "string" ? err : "YubiKey operation failed");
+      const msg = typeof err === "string" ? err : "YubiKey operation failed";
+      // Backend signals "we tried, the key needs a PIN" with this sentinel.
+      // Re-show the form with the PIN field added — keep the password so the
+      // user doesn't have to retype it.
+      if (msg === "YUBIKEY_PIN_REQUIRED") {
+        setYkPinNeeded(true);
+        setYkError(null);
+      } else {
+        setYkError(msg);
+      }
     } finally {
       setYkBusy(false);
     }
@@ -593,11 +608,44 @@ export function Settings() {
                 spellCheck={false}
                 autoComplete="current-password"
               />
+              {ykPinNeeded && (
+                <>
+                  <div
+                    className="info-box info-box-warning"
+                    style={{ marginTop: 10 }}
+                  >
+                    Your YubiKey has a PIN configured. Enter it below — 8
+                    wrong PIN attempts will permanently lock the FIDO2 applet
+                    on the key.
+                  </div>
+                  <label
+                    className="field-label"
+                    htmlFor="yk-pin"
+                    style={{ marginTop: 8 }}
+                  >
+                    YubiKey PIN
+                  </label>
+                  <input
+                    id="yk-pin"
+                    className="password-input"
+                    type="password"
+                    value={ykPin}
+                    onChange={(e) => setYkPin(e.target.value)}
+                    spellCheck={false}
+                    autoComplete="off"
+                    autoFocus
+                  />
+                </>
+              )}
               <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
                 <button
                   type="submit"
                   className="btn-primary"
-                  disabled={ykBusy || ykPassword.length === 0}
+                  disabled={
+                    ykBusy ||
+                    ykPassword.length === 0 ||
+                    (ykPinNeeded && ykPin.length === 0)
+                  }
                 >
                   {ykBusy
                     ? "Working…"
@@ -611,6 +659,8 @@ export function Settings() {
                   onClick={() => {
                     setYkMode("idle");
                     setYkPassword("");
+                    setYkPin("");
+                    setYkPinNeeded(false);
                     setYkError(null);
                   }}
                   disabled={ykBusy}

@@ -18,12 +18,24 @@ pub async fn yubikey_is_present() -> Result<bool, String> {
     yubikey::is_present()
 }
 
+/// Does the inserted YubiKey have a PIN configured? UI uses this to decide
+/// whether to show a PIN field. Cheap probe — no touch required.
+#[tauri::command]
+pub async fn yubikey_requires_pin() -> Result<bool, String> {
+    yubikey::requires_pin()
+}
+
 /// Enrol the currently-inserted YubiKey on the open vault. Requires the
 /// master password to authorise the change. Re-encrypts the vault in place
 /// and rotates the in-memory key.
+///
+/// `pin` is optional. If the device has a PIN set and none is supplied, the
+/// inner FIDO2 call returns the ERR_PIN_REQUIRED sentinel and the UI knows
+/// to pop a PIN field.
 #[tauri::command]
 pub async fn yubikey_enable(
     password: String,
+    pin: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
     let path = state
@@ -34,7 +46,7 @@ pub async fn yubikey_enable(
         .ok_or("Vault is not unlocked")?;
 
     // Perform the FIDO2 enrolment (touch prompt happens here).
-    let enrollment = yubikey::enroll()?;
+    let enrollment = yubikey::enroll(pin.as_deref())?;
     let new_key = format::enable_yubikey(&path, &password, enrollment)?;
     *state.key.lock().map_err(|_| "State lock poisoned")? = Some(new_key);
     Ok(())
@@ -45,6 +57,7 @@ pub async fn yubikey_enable(
 #[tauri::command]
 pub async fn yubikey_disable(
     password: String,
+    pin: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
     let path = state
@@ -54,7 +67,7 @@ pub async fn yubikey_disable(
         .clone()
         .ok_or("Vault is not unlocked")?;
 
-    let new_key = format::disable_yubikey(&path, &password)?;
+    let new_key = format::disable_yubikey(&path, &password, pin.as_deref())?;
     *state.key.lock().map_err(|_| "State lock poisoned")? = Some(new_key);
     Ok(())
 }

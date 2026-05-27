@@ -17,7 +17,8 @@ pub async fn create_vault(
             format::write_display_name(&path, trimmed)?;
         }
     }
-    let (manifest, key) = format::unlock_vault(&path, &password)?;
+    // Newly-created vaults never have a YubiKey enrolled yet, so no PIN.
+    let (manifest, key) = format::unlock_vault(&path, &password, None)?;
     let meta = manifest.to_meta();
     *state.key.lock().unwrap() = Some(key);
     *state.vault_path.lock().unwrap() = Some(path);
@@ -29,9 +30,10 @@ pub async fn create_vault(
 pub async fn unlock_vault(
     password: String,
     path: String,
+    yubikey_pin: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<VaultMeta, String> {
-    let (manifest, key) = format::unlock_vault(&path, &password)?;
+    let (manifest, key) = format::unlock_vault(&path, &password, yubikey_pin.as_deref())?;
     let meta = manifest.to_meta();
     *state.key.lock().unwrap() = Some(key);
     *state.vault_path.lock().unwrap() = Some(path);

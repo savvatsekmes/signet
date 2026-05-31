@@ -15,24 +15,9 @@ Signet works on macOS 10.15 (Catalina) and later.
 2. Open the `.dmg`. A Finder window appears with **Signet** on the left and an **Applications** shortcut on the right.
 3. Drag **Signet** onto **Applications**.
 4. Eject the disk image.
+5. Open Signet from `/Applications` — it should launch straight away.
 
-## First launch — Gatekeeper warning
-
-Signet is currently distributed **unsigned**. The author does not (yet) have a paid Apple Developer account, so macOS Gatekeeper will refuse to open the app on the first launch:
-
-> "Signet" can't be opened because Apple cannot check it for malicious software.
-
-This is expected. To get past it, **right-click** (or Control-click) the app in `/Applications` and choose **Open**. macOS will then show a slightly different dialog with an **Open** button. Click **Open** once and macOS will remember the choice forever.
-
-### Or, from Terminal
-
-If you prefer the command line, you can strip the quarantine flag in one shot:
-
-```sh
-xattr -d com.apple.quarantine /Applications/Signet.app
-```
-
-Then double-click as normal.
+Signet is signed with an Apple Developer ID (Team `7YX5W79L52`, Sam Tsekmes) and notarized by Apple. Gatekeeper recognises the notarization ticket on first launch, so there's no "unidentified developer" warning and no `xattr`/right-click ritual to deal with.
 
 ## Where your data lives
 
@@ -93,5 +78,4 @@ Compare against the hash published on the release page.
 
 ## Known limitations
 
-- **No code signing or notarization.** Until Signet has a paid Apple Developer ID, every release will trigger the Gatekeeper warning above. The app is otherwise fully functional.
 - **YubiKey 2FA needs USB-C accessories to be allowed** on Apple Silicon (see [Using a YubiKey](#using-a-yubikey-optional)). A future release will switch to the OS WebAuthn API so the USB-C authorization step won't matter.

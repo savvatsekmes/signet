@@ -51,6 +51,10 @@
     },
     "macOS": {
       "minimumSystemVersion": "10.15",
+      "signingIdentity": "Developer ID Application: Sam Tsekmes (7YX5W79L52)",
+      "providerShortName": "7YX5W79L52",
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.plist",
       "dmg": {
         "appPosition": { "x": 180, "y": 220 },
         "applicationFolderPosition": { "x": 480, "y": 220 },

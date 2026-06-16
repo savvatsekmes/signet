@@ -30,6 +30,9 @@ pub struct PasswordInput {
     pub notes: Option<String>,
     #[serde(default)]
     pub totp_secret: Option<String>,
+    /// Folder to file this entry under. Empty / missing = "Main".
+    #[serde(default)]
+    pub section: Option<String>,
 }
 
 fn validate(input: &PasswordInput) -> Result<(), String> {
@@ -50,6 +53,18 @@ fn normalize_optional(raw: Option<String>) -> Option<String> {
     raw.map(|s| s.trim().to_string()).filter(|s| !s.is_empty())
 }
 
+/// Folders are stored as a plain string; "Main" / blank are equivalent and
+/// stored as empty so the UI's default folder is canonical.
+fn normalize_section(raw: Option<String>) -> String {
+    let s = raw.unwrap_or_default();
+    let t = s.trim();
+    if t.is_empty() || t.eq_ignore_ascii_case("main") {
+        String::new()
+    } else {
+        t.to_string()
+    }
+}
+
 #[tauri::command]
 pub async fn add_password(
     input: PasswordInput,
@@ -65,6 +80,7 @@ pub async fn add_password(
         password: input.password,
         notes: normalize_optional(input.notes),
         totp_secret: normalize_optional(input.totp_secret),
+        section: normalize_section(input.section),
         created_at: now.clone(),
         updated_at: now,
     };
@@ -101,6 +117,7 @@ pub async fn update_password(
     target.password = input.password;
     target.notes = normalize_optional(input.notes);
     target.totp_secret = normalize_optional(input.totp_secret);
+    target.section = normalize_section(input.section);
     target.updated_at = chrono::Utc::now().to_rfc3339();
     let returned = target.clone();
     format::save_vault(&path, &key, manifest)?;
@@ -151,6 +168,9 @@ struct ColumnMap {
     password: Option<usize>,
     notes: Option<usize>,
     totp: Option<usize>,
+    /// Folder/group column — LastPass "grouping", Bitwarden "folder", etc.
+    /// Imported entries land in the matching Signet folder.
+    folder: Option<usize>,
     /// Extra "username" columns (Dashlane has username, username2, username3 — fall back to next non-empty).
     extra_usernames: Vec<usize>,
 }
@@ -199,6 +219,11 @@ fn detect_columns(headers: &csv::StringRecord) -> (ColumnMap, &'static str) {
             | "totpsecret" => {
                 if map.totp.is_none() {
                     map.totp = Some(i);
+                }
+            }
+            "folder" | "grouping" | "group" | "category" | "collection" => {
+                if map.folder.is_none() {
+                    map.folder = Some(i);
                 }
             }
             _ => {}
@@ -314,6 +339,7 @@ pub async fn import_passwords_csv(
             password: Some(3),
             notes: Some(4),
             totp: None,
+            folder: None,
             extra_usernames: vec![],
         };
         detected_format = "Google Passwords (positional)".to_string();
@@ -335,6 +361,7 @@ pub async fn import_passwords_csv(
         }
         let notes = pick(record, map.notes);
         let totp = pick(record, map.totp);
+        let folder = pick(record, map.folder);
         manifest.passwords.push(PasswordEntry {
             id: uuid::Uuid::new_v4().to_string(),
             name: name.to_string(),
@@ -355,6 +382,11 @@ pub async fn import_passwords_csv(
             } else {
                 Some(totp.to_string())
             },
+            section: normalize_section(if folder.is_empty() {
+                None
+            } else {
+                Some(folder.to_string())
+            }),
             created_at: now.clone(),
             updated_at: now.clone(),
         });

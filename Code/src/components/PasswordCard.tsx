@@ -49,6 +49,9 @@ export function PasswordCard({ entry, onEdit }: Props) {
           {entry.url && (
             <span className="pw-row-link">{stripProtocol(entry.url)}</span>
           )}
+          {entry.section && entry.section.toLowerCase() !== "main" && (
+            <span className="pw-folder-pill">{entry.section}</span>
+          )}
         </div>
         {revealed && (
           <code className="pw-row-pass">{entry.password}</code>

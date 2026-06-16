@@ -24,6 +24,9 @@ export function PasswordsPanel() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<PasswordEntry | null | "new">(null);
+  /** null = "All", "Main" = main folder (also covers legacy blank-section items). */
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [extraTags, setExtraTags] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<{
     file: FileEntryMeta;
@@ -62,19 +65,49 @@ export function PasswordsPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Folder names: derived from entries' sections + any freshly-created empty
+  // folders. "Main" is implicit and never listed here.
+  const tags = useMemo<string[]>(() => {
+    const set = new Set<string>(extraTags);
+    for (const e of entries) {
+      const s = (e.section ?? "").trim();
+      if (s.length > 0 && s.toLowerCase() !== "main") set.add(s);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [entries, extraTags]);
+
+  const isInTag = (entry: PasswordEntry, tag: string): boolean => {
+    const s = (entry.section ?? "").trim();
+    if (tag === "Main") return s === "" || s.toLowerCase() === "main";
+    return s === tag;
+  };
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return entries;
-    return entries.filter(
+    const byTag =
+      activeTag === null
+        ? entries
+        : entries.filter((e) => isInTag(e, activeTag));
+    if (!q) return byTag;
+    return byTag.filter(
       (e) =>
         e.name.toLowerCase().includes(q) ||
         e.username.toLowerCase().includes(q) ||
         (e.url ?? "").toLowerCase().includes(q)
     );
-  }, [entries, search]);
+  }, [entries, search, activeTag]);
+
+  // Folder a new entry should default into, based on the active tab.
+  const tagForNewItems = (): string =>
+    activeTag === null || activeTag === "Main" ? "Main" : activeTag;
 
   const onAdd = async (input: PasswordInput) => {
     await tauri.addPassword(input);
+    const saved = (input.section ?? "").trim();
+    if (saved && saved.toLowerCase() !== "main") {
+      // It's now backed by a real entry — drop it from the pending list.
+      setExtraTags((prev) => prev.filter((s) => s !== saved));
+    }
     await refresh();
     setEditing(null);
   };
@@ -238,6 +271,53 @@ export function PasswordsPanel() {
         </div>
       </div>
 
+      <div className="doc-section-tabs">
+        <button
+          type="button"
+          className={"doc-section-tab" + (activeTag === null ? " active" : "")}
+          onClick={() => setActiveTag(null)}
+        >
+          All
+        </button>
+        <button
+          type="button"
+          className={"doc-section-tab" + (activeTag === "Main" ? " active" : "")}
+          onClick={() => setActiveTag("Main")}
+          title="Passwords in the Main folder (default)"
+        >
+          Main
+        </button>
+        {tags.map((t) => (
+          <button
+            key={t}
+            type="button"
+            className={"doc-section-tab" + (activeTag === t ? " active" : "")}
+            onClick={() => setActiveTag(t)}
+          >
+            {t}
+          </button>
+        ))}
+        <button
+          type="button"
+          className="doc-section-tab doc-section-add"
+          onClick={() => {
+            const name = window.prompt(
+              "New folder name (e.g. Banking, Work, Shopping):"
+            );
+            if (!name) return;
+            const trimmed = name.trim();
+            if (!trimmed || trimmed.toLowerCase() === "main") return;
+            setExtraTags((prev) =>
+              prev.includes(trimmed) ? prev : [...prev, trimmed]
+            );
+            setActiveTag(trimmed);
+          }}
+          title="Create a new folder"
+        >
+          + Folder
+        </button>
+      </div>
+
       <div className="vb-body">
         {error && <div className="vb-error">{error}</div>}
 
@@ -269,7 +349,13 @@ export function PasswordsPanel() {
             notes.
           </div>
         ) : filtered.length === 0 ? (
-          <div className="bene-empty">No passwords match "{search}".</div>
+          <div className="bene-empty">
+            {search.trim()
+              ? `No passwords match "${search}".`
+              : activeTag && activeTag !== "Main"
+              ? `No passwords in "${activeTag}" yet. Add one, or set an existing entry's folder to "${activeTag}".`
+              : "No passwords in this folder yet."}
+          </div>
         ) : (
           <div className="pw-list">
             {filtered.map((p) => (
@@ -298,6 +384,8 @@ export function PasswordsPanel() {
       {editing === "new" && (
         <PasswordForm
           initial={null}
+          knownSections={tags}
+          initialSection={tagForNewItems()}
           onSubmit={onAdd}
           onCancel={() => setEditing(null)}
         />
@@ -305,6 +393,7 @@ export function PasswordsPanel() {
       {editing && editing !== "new" && (
         <PasswordForm
           initial={editing}
+          knownSections={tags}
           onSubmit={onUpdate}
           onDelete={onDelete}
           onCancel={() => setEditing(null)}

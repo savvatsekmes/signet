@@ -83,6 +83,10 @@ pub struct PasswordEntry {
     pub notes: Option<String>,
     #[serde(default)]
     pub totp_secret: Option<String>,
+    /// Free-text folder ("Banking", "Work", ...). Empty = unsorted, shown
+    /// under the "Main" folder in the UI. Surfaced as "Folder".
+    #[serde(default)]
+    pub section: String,
     pub created_at: String,
     pub updated_at: String,
 }

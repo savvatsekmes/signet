@@ -77,6 +77,7 @@ export interface PasswordEntry {
   password: string;
   notes: string | null;
   totp_secret: string | null;
+  section: string;
   created_at: string;
   updated_at: string;
 }
@@ -88,6 +89,7 @@ export interface PasswordInput {
   password: string;
   notes?: string | null;
   totp_secret?: string | null;
+  section?: string | null;
 }
 
 export interface BeneficiaryMeta {

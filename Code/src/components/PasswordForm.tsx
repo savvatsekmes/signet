@@ -1,23 +1,44 @@
 import { useEffect, useState } from "react";
 import type { PasswordEntry, PasswordInput } from "../lib/tauri";
+import { Combobox } from "./Combobox";
 
 interface Props {
   initial?: PasswordEntry | null;
+  /** Folder names already in use, offered in the picker. Excludes "Main". */
+  knownSections?: string[];
+  /** Folder to pre-select for a new entry (defaults to "Main"). */
+  initialSection?: string;
   onSubmit: (input: PasswordInput) => Promise<void>;
   onCancel: () => void;
   onDelete?: () => void;
 }
 
-export function PasswordForm({ initial, onSubmit, onCancel, onDelete }: Props) {
+export function PasswordForm({
+  initial,
+  knownSections = [],
+  initialSection,
+  onSubmit,
+  onCancel,
+  onDelete,
+}: Props) {
   const isEdit = !!initial;
   const [name, setName] = useState(initial?.name ?? "");
   const [url, setUrl] = useState(initial?.url ?? "");
   const [username, setUsername] = useState(initial?.username ?? "");
   const [password, setPassword] = useState(initial?.password ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
+  // Folder: existing entry's section, else the panel's active folder, else Main.
+  const [section, setSection] = useState(() => {
+    const s = (initial?.section ?? "").trim();
+    if (s) return s;
+    const fallback = (initialSection ?? "").trim();
+    return fallback && fallback.toLowerCase() !== "main" ? fallback : "Main";
+  });
   const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const folderOptions = ["Main", ...knownSections.filter((s) => s.toLowerCase() !== "main")];
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -46,7 +67,8 @@ export function PasswordForm({ initial, onSubmit, onCancel, onDelete }: Props) {
         username: username.trim(),
         password,
         notes: notes.trim() || null,
-        totp_secret: null,
+        totp_secret: initial?.totp_secret ?? null,
+        section: section.trim() || "Main",
       });
     } catch (err) {
       setError(typeof err === "string" ? err : "Failed to save");
@@ -78,6 +100,15 @@ export function PasswordForm({ initial, onSubmit, onCancel, onDelete }: Props) {
             placeholder="Gmail, Bank, Netflix…"
             spellCheck={false}
             autoFocus
+          />
+
+          <label className="field-label" htmlFor="pw-folder">Folder</label>
+          <Combobox
+            id="pw-folder"
+            value={section}
+            options={folderOptions}
+            onChange={setSection}
+            placeholder="Main"
           />
 
           <label className="field-label" htmlFor="pw-url">Website / URL <span style={{ textTransform: "none", opacity: 0.6 }}>(optional)</span></label>
